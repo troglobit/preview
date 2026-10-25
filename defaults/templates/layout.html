@@ -43,6 +43,8 @@
     <script src="/static/js/mermaid-init.js"></script>
     {{end}}
     {{if .Reload}}
+    <link rel="stylesheet" href="/static/css/reload-toggle.css" />
+    <script src="/static/js/reload-toggle.js"></script>
     <script src="/static/js/live-reload.js"></script>
     {{end}}
     {{if .IsListing}}
@@ -77,6 +79,11 @@
         <input id="width-custom-input" type="text" inputmode="numeric" maxlength="2" placeholder="--" />%
       </label>
     </div>
+    {{if .Reload}}
+    <button id="reload-toggle" class="theme-toggle" title="Pause auto-reload">
+      <span class="theme-toggle-icon"></span>
+    </button>
+    {{end}}
     <div class="container">
       <div {{if .BoundingBox }} class="container-inner" {{end}}>
         {{if .BackHref}}
