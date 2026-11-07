@@ -78,10 +78,6 @@ To install preview:
 go install github.com/troglobit/preview@latest
 ```
 
-> [!TIP]
-> The repository is also a [nix flake](https://nixos.wiki/wiki/Flakes),
-> so `nix run github:troglobit/preview` works too.
-
 ## :hammer: Usage
 
 To render the `README.md` file simply execute:
