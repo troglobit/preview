@@ -71,6 +71,21 @@ This is **bold** and this is *italic*.
 				`<li>List item 2</li>`,
 			},
 		},
+		{
+			name: "pre block with closing tag is kept",
+			markdown: `Shell session:
+
+<pre><code>$ <b>ls</b>
+foo
+</code></pre>
+
+Done.`,
+			contains: []string{
+				`<pre><code>$ <b>ls</b>`,
+				`</code></pre>`,
+				`<p>Done.</p>`,
+			},
+		},
 	}
 
 	for _, tt := range tests {

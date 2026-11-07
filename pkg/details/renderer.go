@@ -32,51 +32,17 @@ func NewHTMLRenderer(opts ...html.Option) renderer.NodeRenderer {
 
 // RegisterFuncs registers rendering functions
 func (r *HTMLRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	// Register for HTMLBlock to inject IDs
-	reg.Register(ast.KindHTMLBlock, r.renderHTMLBlock)
+	reg.Register(KindDetails, r.renderDetails)
 	// Register for Document nodes to inject script at the end
 	reg.Register(ast.KindDocument, r.renderDocument)
 }
 
-// renderHTMLBlock renders HTML blocks, injecting IDs for details elements
-func (r *HTMLRenderer) renderHTMLBlock(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
-	if !entering {
-		return ast.WalkContinue, nil
+// renderDetails renders the raw <details> block with its ID injected
+func (r *HTMLRenderer) renderDetails(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	if entering {
+		n := node.(*Details)
+		_, _ = w.WriteString(injectID(string(n.Lines().Value(source)), n.ID))
 	}
-
-	htmlBlock := node.(*ast.HTMLBlock)
-
-	// Check if this block has a details ID attribute
-	if attr, ok := htmlBlock.Attribute([]byte("data-details-id")); ok {
-		if idBytes, ok := attr.([]byte); ok {
-			id := string(idBytes)
-
-			// Get the HTML content
-			var htmlContent strings.Builder
-			for i := 0; i < htmlBlock.Lines().Len(); i++ {
-				line := htmlBlock.Lines().At(i)
-				htmlContent.Write(line.Value(source))
-			}
-
-			content := htmlContent.String()
-			modified := injectID(content, id)
-			_, _ = w.WriteString(modified)
-			return ast.WalkContinue, nil
-		}
-	}
-
-	// Default rendering for non-details HTML blocks
-	if htmlBlock.HasClosure() {
-		_, _ = w.WriteString("<!-- raw HTML omitted -->\n")
-		return ast.WalkContinue, nil
-	}
-
-	l := htmlBlock.Lines().Len()
-	for i := range l {
-		line := htmlBlock.Lines().At(i)
-		_, _ = w.Write(line.Value(source))
-	}
-
 	return ast.WalkContinue, nil
 }
 
@@ -94,11 +60,9 @@ func (r *HTMLRenderer) renderDocument(w util.BufWriter, source []byte, node ast.
 				if !entering {
 					return ast.WalkContinue, nil
 				}
-				if htmlBlock, ok := n.(*ast.HTMLBlock); ok {
-					if _, ok := htmlBlock.Attribute([]byte("data-details-id")); ok {
-						hasDetails = true
-						return ast.WalkStop, nil
-					}
+				if n.Kind() == KindDetails {
+					hasDetails = true
+					return ast.WalkStop, nil
 				}
 				return ast.WalkContinue, nil
 			})
