@@ -78,7 +78,7 @@ func Execute() {
 
 func init() {
 	rootCmd.SetVersionTemplate("{{.Name}} {{.Version}}\n")
-	rootCmd.Flags().BoolP("browser", "b", true, "Open new browser tab")
+	rootCmd.Flags().BoolP("browser", "b", false, "Open a browser tab")
 	rootCmd.Flags().StringP("host", "H", "localhost", "Host or IP to listen on")
 	rootCmd.Flags().IntP("port", "p", 6419, "Port to use")
 	rootCmd.Flags().Bool("bounding-box", true, "Add bounding box to HTML")

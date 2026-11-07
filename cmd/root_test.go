@@ -66,7 +66,7 @@ func TestRootRejectsUnknownLogLevel(t *testing.T) {
 	t.Cleanup(func() {
 		rootCmd.SetArgs(nil)
 		_ = rootCmd.Flags().Set("log-level", "info")
-		_ = rootCmd.Flags().Set("browser", "true")
+		_ = rootCmd.Flags().Set("browser", "false")
 		_ = rootCmd.Flags().Set("port", "6419")
 	})
 
