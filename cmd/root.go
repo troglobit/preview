@@ -46,6 +46,7 @@ var rootCmd = &cobra.Command{
 
 		parser := internal.NewParser(disabledFeatures)
 		server := internal.NewServer(host, port, boundingBox, browser, !noReload, parser, logger)
+		server.UsePortFallback(!cmd.Flags().Changed("port"))
 		return server.Serve(file)
 	},
 }
@@ -80,7 +81,7 @@ func init() {
 	rootCmd.SetVersionTemplate("{{.Name}} {{.Version}}\n")
 	rootCmd.Flags().BoolP("browser", "b", false, "Open a browser tab")
 	rootCmd.Flags().StringP("host", "H", "localhost", "Host or IP to listen on")
-	rootCmd.Flags().IntP("port", "p", 6419, "Port to use")
+	rootCmd.Flags().IntP("port", "p", 6419, "Port to use, the next free one is tried when the default is busy")
 	rootCmd.Flags().Bool("bounding-box", true, "Add bounding box to HTML")
 	rootCmd.Flags().StringSlice(
 		"disable-markdown-feature",

@@ -35,6 +35,7 @@ type Server struct {
 	port         int
 	browser      bool
 	enableReload bool
+	portFallback bool
 	hub          *Hub
 	log          *slog.Logger
 }
@@ -65,6 +66,28 @@ func NewServer(host string, port int, boundingBox bool, browser bool, enableRelo
 	}
 }
 
+// portFallbackTries is how many ports above the requested one are tried
+// when it is in use.
+const portFallbackTries = 20
+
+// UsePortFallback makes Serve try the ports following a busy one instead of
+// failing, so a second preview can start next to a running one.
+func (s *Server) UsePortFallback(on bool) {
+	s.portFallback = on
+}
+
+// listen binds host:port. With fallback, a port that cannot be bound is
+// skipped for the next one, up to portFallbackTries times. Port 0 already
+// asks the system for a free port and is never retried.
+func listen(host string, port int, fallback bool) (net.Listener, error) {
+	for try := 0; ; try++ {
+		ln, err := net.Listen("tcp", net.JoinHostPort(host, strconv.Itoa(port+try)))
+		if err == nil || !fallback || port == 0 || try == portFallbackTries {
+			return ln, err
+		}
+	}
+}
+
 func (s *Server) Serve(file string) error {
 	directory, startPath, err := ResolveTarget(file)
 	if err != nil {
@@ -86,11 +109,15 @@ func (s *Server) Serve(file string) error {
 
 	// Bind before printing or opening the browser
 	// in order for a bad host or a busy port to fail fast
-	ln, err := net.Listen("tcp", net.JoinHostPort(s.host, strconv.Itoa(s.port)))
+	ln, err := listen(s.host, s.port, s.portFallback)
 	if err != nil {
 		return err
 	}
-	port := strconv.Itoa(ln.Addr().(*net.TCPAddr).Port)
+	bound := ln.Addr().(*net.TCPAddr).Port
+	if s.port != 0 && bound != s.port {
+		s.log.Info("⚠️  Port in use, using the next free one", "wanted", s.port, "port", bound)
+	}
+	port := strconv.Itoa(bound)
 
 	addr := "http://" + net.JoinHostPort(browseHost(s.host), port) + startPath
 

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"io/fs"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -929,5 +930,29 @@ func TestMarkdownPageLinksPrevNext(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestListenFallsBackToNextPort(t *testing.T) {
+	t.Parallel()
+
+	busy, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer busy.Close() //nolint:errcheck
+	port := busy.Addr().(*net.TCPAddr).Port
+
+	if _, err := listen("127.0.0.1", port, false); err == nil {
+		t.Fatal("expected an error without fallback")
+	}
+
+	ln, err := listen("127.0.0.1", port, true)
+	if err != nil {
+		t.Fatalf("expected a listener on a following port, got %v", err)
+	}
+	defer ln.Close() //nolint:errcheck
+	if got := ln.Addr().(*net.TCPAddr).Port; got <= port || got > port+portFallbackTries {
+		t.Errorf("expected a port in (%d, %d], got %d", port, port+portFallbackTries, got)
 	}
 }
