@@ -52,7 +52,8 @@
   }
 
   function onKeyDown(event) {
-    if (event.ctrlKey || event.altKey || event.metaKey) return;
+    if (event.defaultPrevented || event.isComposing) return;
+    if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
     if (isFormField(event.target)) return;
 
     var links = rowLinks();
@@ -76,6 +77,7 @@
         break;
       case "Backspace":
       case "ArrowLeft":
+      case "Escape":
         var up = upLink();
         if (up) window.location.href = up.href;
         break;

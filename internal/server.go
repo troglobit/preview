@@ -404,6 +404,13 @@ func (s *Server) serveMarkdown(w http.ResponseWriter, r *http.Request, root *Roo
 		return
 	}
 
+	// A folder that cannot be listed only loses the prev/next links.
+	var prev, next string
+	dir, name := splitPage(r.URL.Path)
+	if entries, err := root.List(dir); err == nil {
+		prev, next = siblingHrefs(entries, name)
+	}
+
 	var buf bytes.Buffer
 	err = renderTemplate(&buf, htmlStruct{
 		Content:      string(htmlContent),
@@ -415,6 +422,8 @@ func (s *Server) serveMarkdown(w http.ResponseWriter, r *http.Request, root *Roo
 		Features:     s.parser.TemplateFeatures(),
 		BackHref:     html.EscapeString(backHref(r.URL.Path)),
 		BackLabel:    html.EscapeString(backLabel(r.URL.Path)),
+		PrevHref:     html.EscapeString(prev),
+		NextHref:     html.EscapeString(next),
 	})
 	if err != nil {
 		s.serverError(w, r, err)
@@ -512,6 +521,10 @@ type htmlStruct struct {
 	// folder. Both are HTML-escaped; they are empty on folder pages.
 	BackHref  string
 	BackLabel string
+	// PrevHref and NextHref link a Markdown page to the Markdown files before
+	// and after it in its folder. Both are HTML-escaped and may be empty.
+	PrevHref string
+	NextHref string
 	// Features reports which optional Markdown features are enabled, so the
 	// template only loads their assets when needed.
 	Features map[string]bool

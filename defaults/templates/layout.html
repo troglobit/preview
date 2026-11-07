@@ -49,7 +49,13 @@
     {{end}}
     {{if .BackHref}}
     <link rel="stylesheet" href="/static/css/back-to-folder.css" />
-    <script src="/static/js/back-to-folder.js"></script>
+    <script src="/static/js/page-nav.js"></script>
+    {{end}}
+    {{if .PrevHref}}
+    <link rel="prev" href="{{ .PrevHref }}" />
+    {{end}}
+    {{if .NextHref}}
+    <link rel="next" href="{{ .NextHref }}" />
     {{end}}
   </head>
 

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -85,11 +86,37 @@ func upHref(dirPath string) string {
 	return "../?from=" + url.QueryEscape(path.Base(trimmed))
 }
 
+// siblingHrefs returns the relative links to the Markdown files before and
+// after name among entries, in listing order. Either is "" when name is the
+// first or last Markdown file, or is not in entries.
+func siblingHrefs(entries []Entry, name string) (prev, next string) {
+	var files []string
+	for _, e := range entries {
+		if !e.IsDir && isMarkdownName(e.Name) {
+			files = append(files, e.Name)
+		}
+	}
+	i := slices.Index(files, name)
+	if i > 0 {
+		prev = entryHref(files[i-1], false)
+	}
+	if i >= 0 && i < len(files)-1 {
+		next = entryHref(files[i+1], false)
+	}
+	return prev, next
+}
+
+// splitPage splits the URL path of a Markdown page into its folder, ending
+// in "/", and the file name.
+func splitPage(urlPath string) (dir, name string) {
+	return path.Split(path.Clean("/" + urlPath))
+}
+
 // backHref is the absolute link from the file at urlPath to its containing
 // folder. It carries the file name in ?from= so the folder page focuses the
 // row of the file just left. Each folder segment is escaped like entryHref.
 func backHref(urlPath string) string {
-	dir, name := path.Split(path.Clean("/" + urlPath))
+	dir, name := splitPage(urlPath)
 	var b strings.Builder
 	for _, seg := range strings.Split(strings.Trim(dir, "/"), "/") {
 		if seg == "" {
@@ -106,11 +133,8 @@ func backHref(urlPath string) string {
 // backLabel is the folder containing the file at urlPath, written as the
 // folder view's path heading shows it, e.g. "/docs/".
 func backLabel(urlPath string) string {
-	dir := path.Dir(path.Clean("/" + urlPath))
-	if dir == "/" {
-		return dir
-	}
-	return dir + "/"
+	dir, _ := splitPage(urlPath)
+	return dir
 }
 
 // formatSize renders a byte count in base 1024 units.

@@ -179,3 +179,30 @@ func TestFormatRelativeTime(t *testing.T) {
 		}
 	}
 }
+
+func TestSiblingHrefs(t *testing.T) {
+	entries := []Entry{
+		{Name: "docs", IsDir: true},
+		{Name: "z.md", IsDir: true},
+		{Name: "a.md"},
+		{Name: "b.txt"},
+		{Name: "c:d.MD"},
+		{Name: "e.md"},
+	}
+	tests := []struct {
+		name       string
+		prev, next string
+	}{
+		{"a.md", "", "c%3Ad.MD"},
+		{"c:d.MD", "a.md", "e.md"},
+		{"e.md", "c%3Ad.MD", ""},
+		{"b.txt", "", ""},
+		{"missing.md", "", ""},
+	}
+	for _, tt := range tests {
+		prev, next := siblingHrefs(entries, tt.name)
+		if prev != tt.prev || next != tt.next {
+			t.Errorf("siblingHrefs(%q) = %q, %q; want %q, %q", tt.name, prev, next, tt.prev, tt.next)
+		}
+	}
+}

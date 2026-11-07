@@ -482,7 +482,7 @@ func TestMarkdownPageLinksBackToFolder(t *testing.T) {
 				`<a id="preview-back" ` + tt.wantHref,
 				tt.wantLabel,
 				`<link rel="stylesheet" href="/static/css/back-to-folder.css" />`,
-				`<script src="/static/js/back-to-folder.js"></script>`,
+				`<script src="/static/js/page-nav.js"></script>`,
 			} {
 				if !strings.Contains(body, w) {
 					t.Errorf("body missing %q\n%s", w, body)
@@ -879,6 +879,54 @@ func TestWatchSetFor(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Fatalf("watchSetFor(%q) = %+v, want %+v", tt.path, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMarkdownPageLinksPrevNext(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := writeTree(t, map[string]string{
+		"a.md":          "# A\n",
+		"B.md":          "# B\n",
+		"c d.md":        "# C\n",
+		"notes.txt":     "no\n",
+		"z.md/inner.md": "# I\n",
+		"only/one.md":   "# O\n",
+	})
+
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), nil)
+	handler := server.newHandler(http.Dir(tmpDir))
+
+	tests := []struct {
+		name    string
+		path    string
+		want    []string
+		notWant []string
+	}{
+		{"first", "/a.md", []string{`<link rel="next" href="B.md" />`}, []string{`rel="prev"`}},
+		{"middle", "/B.md", []string{`<link rel="prev" href="a.md" />`, `<link rel="next" href="c%20d.md" />`}, nil},
+		{"last", "/c%20d.md", []string{`<link rel="prev" href="B.md" />`}, []string{`rel="next"`}},
+		{"alone", "/only/one.md", nil, []string{`rel="prev"`, `rel="next"`}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
+			if recorder.Code != http.StatusOK {
+				t.Fatalf("expected status %d, got %d", http.StatusOK, recorder.Code)
+			}
+			body := recorder.Body.String()
+			for _, w := range tt.want {
+				if !strings.Contains(body, w) {
+					t.Errorf("body missing %q\n%s", w, body)
+				}
+			}
+			for _, w := range tt.notWant {
+				if strings.Contains(body, w) {
+					t.Errorf("body has unexpected %q\n%s", w, body)
+				}
 			}
 		})
 	}
