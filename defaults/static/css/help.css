@@ -56,3 +56,9 @@
 .markdown-body .preview-help td:first-child {
   text-align: right;
 }
+
+@media print {
+  .preview-help {
+    display: none !important;
+  }
+}
