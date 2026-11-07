@@ -1,16 +1,6 @@
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="#">
-    <img src=".github/docs/logo-1.png" alt="Logo" height="120">
-  </a>
+# preview
 
-  <h3 align="center">go-grip</h3>
-
-  <p align="center">
-    Render your markdown files local<br>- with the look of GitHub
-  </p>
-</div>
+Render Markdown files locally, with the look of GitHub.
 
 ## Table of Contents
 
@@ -20,13 +10,18 @@
 - [Usage](#hammer-usage)
 - [Examples](#pencil-examples)
 - [Known TODOs / Bugs](#bug-known-todos--bugs)
-- [Similar tools](#pushpin-similar-tools)
+- [Origins](#pushpin-origins)
 
 ## :question: About
 
-**go-grip** is a lightweight, Go-based tool designed to render Markdown files locally, replicating GitHub's style. It offers features like syntax highlighting, dark mode, and support for mermaid diagrams, providing a seamless and visually consistent way to preview Markdown files in your browser.
+**preview** renders Markdown files in your browser the way GitHub shows
+them: same stylesheet, dark and light theme, syntax highlighting,
+mermaid diagrams, math, task lists, alerts and emoji.  It runs as a
+small local web server, watches the files it serves and reloads the
+page when they change.  Nothing is sent to GitHub or anywhere else.
 
-This project is a reimplementation of the original Python-based [grip](https://github.com/joeyespo/grip), which uses GitHub's web API for rendering. By eliminating the reliance on external APIs, go-grip delivers similar functionality while being fully self-contained, faster, and more secure - perfect for offline use or privacy-conscious users.
+It is a fork of [go-grip](https://github.com/chrishrb/go-grip) by
+Christoph Herb, see [Origins](#pushpin-origins).
 
 ## :zap: Features
 
@@ -61,10 +56,10 @@ graph TD;
 ```go
 package main
 
-import "github.com/troglobit/preview/cmd"
+import "fmt"
 
 func main() {
-	fmt.Sprintln("Welcome to Grip! Use `go-grip --help` for more information.")
+	fmt.Println("Hello from preview!")
 }
 ```
 
@@ -77,24 +72,24 @@ func main() {
 
 ## :rocket: Getting started
 
-To install go-grip, simply:
+To install preview:
 
 ```bash
 go install github.com/troglobit/preview@latest
 ```
 
 > [!TIP]
-> You can also use nix flakes to install this plugin.
-> More useful information [here](https://nixos.wiki/wiki/Flakes).
+> The repository is also a [nix flake](https://nixos.wiki/wiki/Flakes),
+> so `nix run github:troglobit/preview` works too.
 
 ## :hammer: Usage
 
 To render the `README.md` file simply execute:
 
 ```bash
-go-grip README.md
+preview README.md
 # or
-go-grip
+preview
 ```
 
 The browser will automatically open on http://localhost:6419. You can disable this behaviour with the `-b=false` option.
@@ -102,19 +97,19 @@ The browser will automatically open on http://localhost:6419. You can disable th
 You can also specify a port:
 
 ```bash
-go-grip -p 80 README.md
+preview -p 80 README.md
 ```
 
 By default the server only listens on `localhost`, so it is not reachable from other machines. To listen on a specific interface pass its IP address with `-H`, or use `0.0.0.0` to listen on all interfaces:
 
 ```bash
-go-grip -H 0.0.0.0 README.md
+preview -H 0.0.0.0 README.md
 ```
 
 or just open the folder page for the current directory:
 
 ```bash
-go-grip
+preview
 ```
 
 The folder page shows a table of the folder's entries (folders first, with size and modification time) and, if the folder has a `README.md`, renders it below the table, like GitHub does. Every folder you open in the browser gets the same page. Use the arrow keys (or `j`/`k`) to move between rows, Enter to open a file or folder, and Backspace or ← to go up to the parent folder.
@@ -122,10 +117,10 @@ The folder page shows a table of the folder's entries (folders first, with size 
 To serve another folder, pass it as the argument (with or without a trailing slash):
 
 ```bash
-go-grip docs/
+preview docs/
 ```
 
-go-grip then serves that folder as the root and opens its folder page. A file argument serves the file's folder and opens the file. If the given path does not exist, go-grip prints an error and exits with status 1 instead of starting the server.
+preview then serves that folder as the root and opens its folder page. A file argument serves the file's folder and opens the file. If the given path does not exist, preview prints an error and exits with status 1 instead of starting the server.
 
 Dark mode is not a launch option: use the toggle in the top right corner of the page. Your choice is stored in the browser's local storage, so each browser remembers its own theme. Without a stored choice the page follows the operating system's `prefers-color-scheme` setting.
 
@@ -136,21 +131,21 @@ By default each open page reloads when something it shows changes: a Markdown pa
 To disable automatic browser reload on file changes (useful for stable editing):
 
 ```bash
-go-grip --no-reload README.md
+preview --no-reload README.md
 ```
 
 To disable markdown features in the renderer, use `--disable-markdown-feature`.
 Supported feature names are `details`, `footnote`, `ghissue`, `mathjax`, and `mermaid`.
 
 ```bash
-go-grip --disable-markdown-feature mathjax README.md
-go-grip --disable-markdown-feature mathjax --disable-markdown-feature mermaid README.md
+preview --disable-markdown-feature mathjax README.md
+preview --disable-markdown-feature mathjax --disable-markdown-feature mermaid README.md
 ```
 
-go-grip logs to stderr. `--log-level` sets how much it prints: `error`, `warn`, `info` (the default) or `debug`. At `info` you only see the startup lines, warnings and errors; `error` hides the startup lines too. `debug` adds a timestamped line for every request (method, path, status, duration), every file system event and whether it was ignored, each debounced reload and how many events it coalesced, and each live reload connection. Attach that output when reporting a reload problem:
+preview logs to stderr. `--log-level` sets how much it prints: `error`, `warn`, `info` (the default) or `debug`. At `info` you only see the startup lines, warnings and errors; `error` hides the startup lines too. `debug` adds a timestamped line for every request (method, path, status, duration), every file system event and whether it was ignored, each debounced reload and how many events it coalesced, and each live reload connection. Attach that output when reporting a reload problem:
 
 ```bash
-go-grip --log-level=debug README.md
+preview --log-level=debug README.md
 ```
 
 The browser page title is derived from the Markdown filename (`my-guide_v2.md` becomes `My Guide V2`).
@@ -158,7 +153,7 @@ The browser page title is derived from the Markdown filename (`my-guide_v2.md` b
 To check which build you are running:
 
 ```bash
-go-grip --version
+preview --version
 ```
 
 To terminate the current server simply press `CTRL-C`.
@@ -171,6 +166,11 @@ To terminate the current server simply press `CTRL-C`.
 
 - [ ] Make it possible to export the generated html
 
-## :pushpin: Similar tools
+## :pushpin: Origins
 
-This tool is a Go-based reimplementation of the original [grip](https://github.com/joeyespo/grip), offering the same functionality without relying on GitHub's web API.
+preview is a fork of [go-grip](https://github.com/chrishrb/go-grip) by
+Christoph Herb, a Go reimplementation of the Python
+[grip](https://github.com/joeyespo/grip) by Joe Esposito.  grip renders
+through GitHub's web API; go-grip, and therefore preview, render locally
+with [goldmark](https://github.com/yuin/goldmark) and need no network
+access.
