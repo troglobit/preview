@@ -1,7 +1,13 @@
 package main
 
-import "github.com/troglobit/preview/cmd"
+import (
+	"os"
+
+	preview "github.com/troglobit/preview/src"
+)
 
 func main() {
-	cmd.Execute()
+	if err := preview.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

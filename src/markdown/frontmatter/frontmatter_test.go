@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/troglobit/preview/pkg/frontmatter"
+	"github.com/troglobit/preview/src/markdown/frontmatter"
 )
 
 // ---------- Extract tests ----------

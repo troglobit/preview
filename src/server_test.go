@@ -1,9 +1,10 @@
-package internal
+package preview
 
 import (
 	"bufio"
 	"context"
 	"io/fs"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -1037,5 +1040,256 @@ func TestReloadToggleButtonRenderedOnlyWhenReloadEnabled(t *testing.T) {
 					tt.name, page, tt.wantButton, hasButton, hasScript)
 			}
 		}
+	}
+}
+
+func TestMarkdownResponseOmitsDisabledFeatureAssets(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name            string
+		disabledFeature string
+		input           string
+		wantContains    []string
+		wantNotContains []string
+	}{
+		{
+			name:            "mathjax",
+			disabledFeature: FeatureMathJax,
+			input:           "Inline math: $x + y$\n",
+			wantContains:    []string{"$x + y$"},
+			wantNotContains: []string{"/static/js/tex-mml-chtml.js", "/static/css/mathjax.css"},
+		},
+		{
+			name:            "mermaid",
+			disabledFeature: FeatureMermaid,
+			input:           "```mermaid\ngraph TD;\n  A-->B;\n```\n",
+			wantContains:    []string{`class="highlight`, `graph TD;`},
+			wantNotContains: []string{"/static/js/mermaid.min.js", "/static/css/github-mermaid.css"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			tmpDir := t.TempDir()
+			if err := os.WriteFile(filepath.Join(tmpDir, "README.md"), []byte(tt.input), 0o644); err != nil {
+				t.Fatalf("write README.md: %v", err)
+			}
+
+			server := NewServer("localhost", 6419, false, false, false, NewParser([]string{tt.disabledFeature}), nil)
+			handler := server.newHandler(http.Dir(tmpDir))
+
+			req := httptest.NewRequest(http.MethodGet, "/README.md", nil)
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, req)
+
+			body := recorder.Body.String()
+			for _, want := range tt.wantContains {
+				if !strings.Contains(body, want) {
+					t.Fatalf("expected body to contain %q, got %q", want, body)
+				}
+			}
+			for _, unwanted := range tt.wantNotContains {
+				if strings.Contains(body, unwanted) {
+					t.Fatalf("expected body not to contain %q, got %q", unwanted, body)
+				}
+			}
+		})
+	}
+}
+
+func TestResponsesNameMermaidIconPacks(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		iconPacks []string
+		want      string
+	}{
+		{
+			name: "none",
+			want: `<script src="/static/js/mermaid-init.js"></script>`,
+		},
+		{
+			name:      "two packs",
+			iconPacks: []string{"logos", "fa6-brands"},
+			want:      `<script src="/static/js/mermaid-init.js" data-icon-packs="logos,fa6-brands"></script>`,
+		},
+		{
+			name:      "spaces and capitals",
+			iconPacks: []string{" Logos "},
+			want:      `<script src="/static/js/mermaid-init.js" data-icon-packs="logos"></script>`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			server := NewServer("localhost", 6419, false, false, false, NewParser(nil), nil)
+			if err := server.SetMermaidIconPacks(tt.iconPacks); err != nil {
+				t.Fatalf("SetMermaidIconPacks(%q): %v", tt.iconPacks, err)
+			}
+			handler := server.newHandler(http.Dir(writeTree(t, map[string]string{"README.md": "# Title\n"})))
+
+			for _, path := range []string{"/README.md", "/"} {
+				req := httptest.NewRequest(http.MethodGet, path, nil)
+				recorder := httptest.NewRecorder()
+				handler.ServeHTTP(recorder, req)
+
+				if body := recorder.Body.String(); !strings.Contains(body, tt.want) {
+					t.Errorf("GET %s: expected body to contain %q, got %q", path, tt.want, body)
+				}
+			}
+		})
+	}
+}
+
+func TestSetMermaidIconPacksRejectsNonPrefixNames(t *testing.T) {
+	t.Parallel()
+
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), nil)
+	for _, name := range []string{"", "-logos", "logos-", "simple--icons", "logos,mdi", `logos" onload="alert(1)`} {
+		if err := server.SetMermaidIconPacks([]string{name}); err == nil {
+			t.Errorf("SetMermaidIconPacks(%q) = nil, want an error", name)
+		}
+	}
+}
+
+func TestRequestLogQuietAtInfo(t *testing.T) {
+	t.Parallel()
+	dir := writeTree(t, map[string]string{"a.md": "# A\n"})
+	buf := &syncBuffer{}
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), NewLogger(buf, slog.LevelInfo))
+	handler := server.newHandler(http.Dir(dir))
+
+	for _, p := range []string{"/a.md", "/", "/static/js/live-reload.js", "/missing.txt"} {
+		handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, p, nil))
+	}
+	if out := buf.String(); out != "" {
+		t.Fatalf("expected no request output at info, got:\n%s", out)
+	}
+}
+
+func TestRequestLogAtDebug(t *testing.T) {
+	t.Parallel()
+	dir := writeTree(t, map[string]string{"a.md": "# A\n"})
+	buf := &syncBuffer{}
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), NewLogger(buf, slog.LevelDebug))
+	handler := server.newHandler(http.Dir(dir))
+
+	tests := []struct {
+		path   string
+		status int
+	}{
+		{"/a.md", http.StatusOK},
+		{"/missing.txt", http.StatusNotFound},
+		{"/static/js/live-reload.js", http.StatusOK},
+		{"/sub", http.StatusNotFound},
+	}
+	for _, tt := range tests {
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, tt.path, nil))
+		if rec.Code != tt.status {
+			t.Fatalf("%s: status %d, want %d", tt.path, rec.Code, tt.status)
+		}
+		re := regexp.MustCompile(`DEBUG request method=GET path=` + regexp.QuoteMeta(tt.path) +
+			` status=` + strconv.Itoa(tt.status) + ` bytes=\d+ dur=[0-9.]+[µnm]?s\n`)
+		if !re.MatchString(buf.String()) {
+			t.Fatalf("%s: no request line with status %d in:\n%s", tt.path, tt.status, buf.String())
+		}
+	}
+}
+
+func TestStatusRecorder(t *testing.T) {
+	t.Parallel()
+
+	inner := httptest.NewRecorder()
+	rec := &statusRecorder{ResponseWriter: inner}
+	rec.WriteHeader(http.StatusTeapot)
+	rec.WriteHeader(http.StatusOK) // superfluous; the first code wins
+	_, _ = rec.Write([]byte("hello"))
+	rec.Flush()
+	if rec.status != http.StatusTeapot || rec.bytes != 5 {
+		t.Fatalf("recorded status %d, bytes %d", rec.status, rec.bytes)
+	}
+	if !inner.Flushed {
+		t.Fatal("Flush was not forwarded")
+	}
+	var _ http.Flusher = rec
+
+	implicit := &statusRecorder{ResponseWriter: httptest.NewRecorder()}
+	_, _ = implicit.Write([]byte("x"))
+	if implicit.status != http.StatusOK {
+		t.Fatalf("implicit status %d, want 200", implicit.status)
+	}
+}
+
+func TestEventsStreamWithDebugLogging(t *testing.T) {
+	t.Parallel()
+
+	dir := writeTree(t, map[string]string{"docs/a.md": "# A\n"})
+	hub, src, hubLog := loggedHub(t, testDebounce, slog.LevelDebug)
+	buf := &syncBuffer{}
+	server := NewServer("localhost", 6419, false, false, true, NewParser(nil), NewLogger(buf, slog.LevelDebug))
+	server.hub = hub
+	ts := httptest.NewServer(server.newHandler(http.Dir(dir)))
+	defer ts.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+eventsPath+"?path="+url.QueryEscape("/docs/a.md"), nil)
+	if err != nil {
+		t.Fatalf("new request: %v", err)
+	}
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatalf("get events: %v", err)
+	}
+	defer resp.Body.Close() //nolint:errcheck
+
+	reader := bufio.NewReader(resp.Body)
+	if line, err := reader.ReadString('\n'); err != nil || line != ": connected\n" {
+		t.Fatalf("expected the connected comment first, got %q (%v)", line, err)
+	}
+	waitForLog(t, buf, "sse connect page=/docs/a.md")
+	waitForLog(t, buf, "watch set page=/docs/a.md files=1 dirs=0 took=")
+
+	src.events <- fsnotify.Event{Name: filepath.Join(dir, "docs", "a.md"), Op: fsnotify.Write}
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			t.Fatalf("read: %v", err)
+		}
+		if line == "event: reload\n" {
+			break
+		}
+	}
+	waitForLog(t, buf, "sse reload sent page=/docs/a.md")
+	waitForLog(t, hubLog, "debounce fire sub=1 page=/docs/a.md coalesced=1")
+
+	cancel()
+	waitForLog(t, buf, "sse disconnect page=/docs/a.md reloads=1 dur=")
+	waitForLog(t, buf, "request method=GET path="+eventsPath+" status=200")
+}
+
+func TestEventsRejectionLogsWarning(t *testing.T) {
+	t.Parallel()
+	dir := writeTree(t, map[string]string{"a.md": "# A\n"})
+	hub, _, _ := loggedHub(t, testDebounce, slog.LevelInfo)
+	buf := &syncBuffer{}
+	server := NewServer("localhost", 6419, false, false, true, NewParser(nil), NewLogger(buf, slog.LevelWarn))
+	server.hub = hub
+	handler := server.newHandler(http.Dir(dir))
+
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, eventsPath+"?path=/../x.md", nil))
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status %d, want 400", rec.Code)
+	}
+	if got, want := buf.String(), "WARN live reload request rejected page=/../x.md\n"; got != want {
+		t.Fatalf("got %q, want %q", got, want)
 	}
 }

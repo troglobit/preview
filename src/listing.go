@@ -1,4 +1,4 @@
-package internal
+package preview
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/troglobit/preview/defaults"
+	"github.com/troglobit/preview/src/assets"
 )
 
 // listingRow is one table row of a folder page.
@@ -32,7 +32,7 @@ type listingData struct {
 
 // listingTemplate is parsed with html/template, unlike layout.html: file
 // names are untrusted, so every name and href is escaped by the template.
-var listingTemplate = template.Must(template.ParseFS(defaults.Templates, "templates/listing.html"))
+var listingTemplate = template.Must(template.ParseFS(assets.Templates, "templates/listing.html"))
 
 // renderListing renders the folder page fragment for dirPath (a URL path
 // ending in "/") from entries. A non-empty readme is placed below the table.

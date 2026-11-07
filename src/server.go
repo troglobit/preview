@@ -1,4 +1,4 @@
-package internal
+package preview
 
 import (
 	"bytes"
@@ -13,9 +13,11 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -25,7 +27,7 @@ import (
 
 	chroma_html "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/styles"
-	"github.com/troglobit/preview/defaults"
+	"github.com/troglobit/preview/src/assets"
 )
 
 const defaultHTMLTitle = "preview"
@@ -149,7 +151,7 @@ func (s *Server) Serve(file string) error {
 	s.log.Debug("serving directory", "dir", directory)
 
 	if s.browser {
-		err := Open(addr)
+		err := openBrowser(addr)
 		if err != nil {
 			s.log.Warn("❌ Error opening browser", "err", err)
 		}
@@ -253,7 +255,7 @@ func (s *Server) newHandler(fsys http.FileSystem) http.Handler {
 	root := NewRoot(fsys)
 	fileServer := http.FileServer(fsys)
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.FileServer(http.FS(defaults.StaticFiles)))
+	mux.Handle("/static/", http.FileServer(http.FS(assets.StaticFiles)))
 
 	if s.reloading() {
 		absRoot := ""
@@ -613,7 +615,7 @@ func formatFilenameTitle(filename string) string {
 }
 
 func renderTemplate(w io.Writer, html htmlStruct) error {
-	tmpl, err := template.ParseFS(defaults.Templates, "templates/layout.html")
+	tmpl, err := template.ParseFS(assets.Templates, "templates/layout.html")
 	if err != nil {
 		return err
 	}
@@ -637,4 +639,21 @@ func setNoCacheHeaders(w http.ResponseWriter) {
 func stripCacheValidators(r *http.Request) {
 	r.Header.Del("If-Modified-Since")
 	r.Header.Del("If-None-Match")
+}
+
+func openBrowser(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }

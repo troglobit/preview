@@ -1,4 +1,4 @@
-package internal
+package preview
 
 import (
 	"bytes"
@@ -7,15 +7,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/troglobit/preview/pkg/alert"
-	"github.com/troglobit/preview/pkg/details"
-	"github.com/troglobit/preview/pkg/footnote"
-	"github.com/troglobit/preview/pkg/frontmatter"
-	"github.com/troglobit/preview/pkg/ghissue"
-	"github.com/troglobit/preview/pkg/highlighting"
-	"github.com/troglobit/preview/pkg/mathjax"
-	"github.com/troglobit/preview/pkg/slug"
-	"github.com/troglobit/preview/pkg/tasklist"
+	"github.com/troglobit/preview/src/markdown/alert"
+	"github.com/troglobit/preview/src/markdown/details"
+	"github.com/troglobit/preview/src/markdown/footnote"
+	"github.com/troglobit/preview/src/markdown/frontmatter"
+	"github.com/troglobit/preview/src/markdown/ghissue"
+	"github.com/troglobit/preview/src/markdown/highlighting"
+	"github.com/troglobit/preview/src/markdown/mathjax"
+	"github.com/troglobit/preview/src/markdown/slug"
+	"github.com/troglobit/preview/src/markdown/tasklist"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark-emoji"
 	"github.com/yuin/goldmark/ast"

@@ -1,5 +1,5 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS  = -s -w -X github.com/troglobit/preview/cmd.version=$(VERSION)
+LDFLAGS  = -s -w -X github.com/troglobit/preview/src.version=$(VERSION)
 
 all: build
 

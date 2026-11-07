@@ -1,14 +1,14 @@
-package cmd
+package preview
 
 import (
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/troglobit/preview/internal"
 )
 
 var rootCmd = &cobra.Command{
@@ -41,12 +41,12 @@ var rootCmd = &cobra.Command{
 			file = args[0]
 		}
 
-		if err := internal.ValidateMarkdownFeatures(disabledFeatures); err != nil {
+		if err := ValidateMarkdownFeatures(disabledFeatures); err != nil {
 			return err
 		}
 
-		parser := internal.NewParser(disabledFeatures)
-		server := internal.NewServer(host, port, boundingBox, browser, !noReload, parser, logger)
+		parser := NewParser(disabledFeatures)
+		server := NewServer(host, port, boundingBox, browser, !noReload, parser, logger)
 		server.UsePortFallback(!cmd.Flags().Changed("port"))
 		if err := server.SetMermaidIconPacks(iconPacks); err != nil {
 			return fmt.Errorf("--mermaid-icon-pack: %w", err)
@@ -55,10 +55,15 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// Execute runs the command line and returns its error, for main to exit on.
+func Execute() error {
+	return rootCmd.Execute()
+}
+
 // logLevel returns the validated --log-level value.
 func logLevel(cmd *cobra.Command) (slog.Level, error) {
 	value, _ := cmd.Flags().GetString("log-level")
-	level, err := internal.ParseLogLevel(value)
+	level, err := ParseLogLevel(value)
 	if err != nil {
 		return 0, fmt.Errorf("--log-level: %w", err)
 	}
@@ -71,14 +76,7 @@ func newLogger(cmd *cobra.Command, w io.Writer) (*slog.Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	return internal.NewLogger(w, level), nil
-}
-
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+	return NewLogger(w, level), nil
 }
 
 func init() {
@@ -90,7 +88,7 @@ func init() {
 	rootCmd.Flags().StringSlice(
 		"disable-markdown-feature",
 		nil,
-		"Disable optional markdown feature(s): "+strings.Join(internal.SupportedMarkdownFeatures(), ", "),
+		"Disable optional markdown feature(s): "+strings.Join(SupportedMarkdownFeatures(), ", "),
 	)
 	rootCmd.Flags().StringSlice(
 		"mermaid-icon-pack",
@@ -99,4 +97,70 @@ func init() {
 	)
 	rootCmd.Flags().Bool("no-reload", false, "Disable automatic browser reload on file changes")
 	rootCmd.Flags().String("log-level", "info", "Log level on stderr: error, warn, info or debug")
+}
+
+// These are set at build time via -ldflags, e.g.
+//
+//	go build -ldflags "-X github.com/troglobit/preview/src.version=v1.2.3"
+//
+// When they are left empty the values are derived from the embedded build
+// info, which covers `go install` and builds from a checkout.
+var (
+	version = ""
+	commit  = ""
+	date    = ""
+)
+
+// buildVersion assembles the string reported by `preview --version`.
+func buildVersion() string {
+	v, c, d := version, commit, date
+	modified := false
+
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		for _, s := range info.Settings {
+			switch s.Key {
+			case "vcs.revision":
+				if c == "" {
+					c = s.Value
+				}
+			case "vcs.time":
+				if d == "" {
+					d = s.Value
+				}
+			case "vcs.modified":
+				modified = s.Value == "true"
+			}
+		}
+	}
+
+	// A version stamped by the go tool is either a release tag or a
+	// pseudo-version that already contains the commit and date, so it is
+	// reported as-is.
+	if v == "" && ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+
+	if v == "" {
+		v = "dev"
+	}
+
+	var details []string
+	if c != "" {
+		if len(c) > 12 {
+			c = c[:12]
+		}
+		if modified {
+			c += "-dirty"
+		}
+		details = append(details, "commit "+c)
+	}
+	if d != "" {
+		details = append(details, "built "+d)
+	}
+
+	if len(details) == 0 {
+		return v
+	}
+	return v + " (" + strings.Join(details, ", ") + ")"
 }
