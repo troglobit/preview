@@ -10,26 +10,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: jdx/mise-action@v3
+      - uses: actions/setup-go@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          go-version-file: go.mod
 
       - name: Build
-        run: mise run build
+        run: make build
 
       - name: Run tests
-        run: mise run test
+        run: make test
+
+      - name: Vet
+        run: make vet
 
       - name: Format
-        run: |
-          DIFF="$(gofmt -d .)"
-          if [[ -n $DIFF ]]; then
-            echo "$DIFF"
-            echo "please run gofmt"
-            exit 1
-          fi
+        run: make fmt-check
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
-          install-mode: none
+          version: v2.7
