@@ -16,12 +16,15 @@ Render a file, or serve a folder and browse it like on GitHub:
 
     preview README.md
     preview docs/
+    🚀 Starting server: http://localhost:6419/
+    📡 Auto-reload enabled. Files will trigger browser refresh.
 
-The server listens on http://localhost:6419, add `-b` to open it in a
-browser.  See `preview --help` for the other options.
+Add `-b` to open it in a browser.  See `preview --help` for the other
+options.
 
 On a file page, the left and right arrow keys step to the previous and
 next Markdown file in the same folder.  Esc goes up to the folder.
+Press `?` on any page for the full list of keys.
 
 ## Origins
 

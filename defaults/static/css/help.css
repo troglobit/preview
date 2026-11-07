@@ -1,0 +1,56 @@
+/* Keyboard shortcut help, opened with ? (see help.js). The dialog sits
+   inside body.markdown-body, so it inherits the page colours and follows
+   the theme toggle without rules of its own. */
+.preview-help {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+  max-width: calc(100% - 32px);
+  padding: 0;
+  border: 1px solid var(--borderColor-default);
+  border-radius: 6px;
+  background: inherit;
+  color: inherit;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.preview-help::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.preview-help-inner {
+  padding: 16px 24px 20px;
+}
+
+.markdown-body .preview-help h2 {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  font-size: 16px;
+}
+
+/* Undo the GitHub table look: no borders, no stripes. */
+.markdown-body .preview-help table {
+  display: table;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.markdown-body .preview-help tr,
+.markdown-body .preview-help tr:nth-child(2n) {
+  background-color: transparent;
+  border-top: 0;
+}
+
+.markdown-body .preview-help td {
+  padding: 4px 16px 4px 0;
+  border: 0;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.markdown-body .preview-help td:first-child {
+  text-align: right;
+}

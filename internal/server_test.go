@@ -956,3 +956,51 @@ func TestListenFallsBackToNextPort(t *testing.T) {
 		t.Errorf("expected a port in (%d, %d], got %d", port, port+portFallbackTries, got)
 	}
 }
+
+func TestPagesHaveKeyboardHelp(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := writeTree(t, map[string]string{"a.md": "# A\n"})
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), nil)
+	handler := server.newHandler(http.Dir(tmpDir))
+
+	tests := []struct {
+		name    string
+		path    string
+		want    []string
+		notWant []string
+	}{
+		{"file page", "/a.md", []string{"Next Markdown file"}, []string{"Next row"}},
+		{"folder page", "/", []string{"Next row"}, []string{"Next Markdown file"}},
+	}
+	always := []string{
+		`<dialog id="preview-help"`,
+		`<script src="/static/js/help.js" defer></script>`,
+		`<link rel="stylesheet" href="/static/css/help.css" />`,
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
+			if recorder.Code != http.StatusOK {
+				t.Fatalf("expected status %d, got %d", http.StatusOK, recorder.Code)
+			}
+			body := recorder.Body.String()
+			for _, w := range always {
+				if !strings.Contains(body, w) {
+					t.Errorf("body missing %q", w)
+				}
+			}
+			for _, w := range tt.want {
+				if !strings.Contains(body, w) {
+					t.Errorf("body missing %q", w)
+				}
+			}
+			for _, w := range tt.notWant {
+				if strings.Contains(body, w) {
+					t.Errorf("body has unexpected %q", w)
+				}
+			}
+		})
+	}
+}
