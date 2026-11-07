@@ -1,5 +1,5 @@
 {
-  description = "go-grip - render your markdown files local";
+  description = "preview - render Markdown files locally, GitHub style";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
@@ -22,14 +22,14 @@
   in {
     packages = forAllSystems (pkgs: {
       default = pkgs.buildGoModule rec {
-        pname = "go-grip";
+        pname = "preview";
         version = self.shortRev or self.dirtyShortRev or "dev";
         src = self;
         ldflags = [
           "-s"
           "-w"
           "-X"
-          "github.com/chrishrb/go-grip/cmd.version=${version}"
+          "github.com/troglobit/preview/cmd.version=${version}"
         ];
         # Only for updating vendorHas
         # vendorHash = "sha256-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR=";

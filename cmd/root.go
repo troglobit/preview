@@ -7,12 +7,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chrishrb/go-grip/internal"
 	"github.com/spf13/cobra"
+	"github.com/troglobit/preview/internal"
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "go-grip [file]",
+	Use:     "preview [file]",
 	Short:   "Render markdown document as html",
 	Version: buildVersion(),
 	Args:    cobra.MatchAll(cobra.OnlyValidArgs),

@@ -22,7 +22,7 @@ run = "go run -tags debug main.go emojiscraper defaults/static/emojis pkg/emoji_
 
 [tasks.build]
 description = "Build"
-run = "go build -tags debug -o bin/go-grip main.go"
+run = "go build -tags debug -o bin/preview main.go"
 
 [tasks.vendor]
 description = "Vendor"
@@ -36,13 +36,13 @@ run = "go test ./..."
 description = "Compile for every OS and Platform"
 shell = '''
 echo "Compiling for every OS and Platform"
-LDFLAGS="-s -w -X github.com/chrishrb/go-grip/cmd.version=$(git describe --tags --always --dirty)"
-GOOS=darwin GOARCH=amd64 go build -ldflags "$LDFLAGS" -o bin/go-grip-darwin-amd64 main.go
-GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o bin/go-grip-darwin-arm64 main.go
-GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o bin/go-grip-linux-amd64 main.go
-GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o bin/go-grip-linux-arm64 main.go
-GOOS=windows GOARCH=amd64 go build -ldflags "$LDFLAGS" -o bin/go-grip-windows-amd64.exe main.go
-GOOS=windows GOARCH=arm64 go build -ldflags "$LDFLAGS" -o bin/go-grip-windows-arm64.exe main.go
+LDFLAGS="-s -w -X github.com/troglobit/preview/cmd.version=$(git describe --tags --always --dirty)"
+GOOS=darwin GOARCH=amd64 go build -ldflags "$LDFLAGS" -o bin/preview-darwin-amd64 main.go
+GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o bin/preview-darwin-arm64 main.go
+GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o bin/preview-linux-amd64 main.go
+GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o bin/preview-linux-arm64 main.go
+GOOS=windows GOARCH=amd64 go build -ldflags "$LDFLAGS" -o bin/preview-windows-amd64.exe main.go
+GOOS=windows GOARCH=arm64 go build -ldflags "$LDFLAGS" -o bin/preview-windows-arm64.exe main.go
 '''
 
 [tasks.format]

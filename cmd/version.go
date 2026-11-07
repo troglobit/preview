@@ -7,7 +7,7 @@ import (
 
 // These are set at build time via -ldflags, e.g.
 //
-//	go build -ldflags "-X github.com/chrishrb/go-grip/cmd.version=v1.2.3"
+//	go build -ldflags "-X github.com/troglobit/preview/cmd.version=v1.2.3"
 //
 // When they are left empty the values are derived from the embedded build
 // info, which covers `go install` and builds from a checkout.
@@ -17,7 +17,7 @@ var (
 	date    = ""
 )
 
-// buildVersion assembles the string reported by `go-grip --version`.
+// buildVersion assembles the string reported by `preview --version`.
 func buildVersion() string {
 	v, c, d := version, commit, date
 	modified := false

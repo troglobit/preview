@@ -31,6 +31,6 @@ jobs:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
           goversion: 1.23
-          binary_name: "go-grip"
-          ldflags: -s -w -X github.com/chrishrb/go-grip/cmd.version=${{ github.ref_name }}
+          binary_name: "preview"
+          ldflags: -s -w -X github.com/troglobit/preview/cmd.version=${{ github.ref_name }}
           extra_files: LICENSE README.md

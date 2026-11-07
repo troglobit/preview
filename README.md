@@ -61,7 +61,7 @@ graph TD;
 ```go
 package main
 
-import "github.com/chrishrb/go-grip/cmd"
+import "github.com/troglobit/preview/cmd"
 
 func main() {
 	fmt.Sprintln("Welcome to Grip! Use `go-grip --help` for more information.")
@@ -80,7 +80,7 @@ func main() {
 To install go-grip, simply:
 
 ```bash
-go install github.com/chrishrb/go-grip@latest
+go install github.com/troglobit/preview@latest
 ```
 
 > [!TIP]

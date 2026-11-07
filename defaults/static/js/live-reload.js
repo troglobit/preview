@@ -1,4 +1,4 @@
-// Live reload: go-grip streams a "reload" event when something this page
+// Live reload: preview streams a "reload" event when something this page
 // shows has changed (the Markdown file, an image it references, or for a
 // folder page, the folder's entries).
 (function () {

@@ -1,4 +1,4 @@
-module github.com/chrishrb/go-grip
+module github.com/troglobit/preview
 
 go 1.25
 

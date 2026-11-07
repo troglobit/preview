@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chrishrb/go-grip/defaults"
+	"github.com/troglobit/preview/defaults"
 )
 
 // listingRow is one table row of a folder page.
