@@ -1,19 +1,19 @@
 (function () {
   function rowLinks() {
     return Array.prototype.slice.call(
-      document.querySelectorAll(".grip-listing-row .grip-listing-name a")
+      document.querySelectorAll(".preview-listing-row .preview-listing-name a")
     );
   }
 
   function focusLink(link) {
     if (!link) return;
     link.focus({ preventScroll: true });
-    var row = link.closest(".grip-listing-row") || link;
+    var row = link.closest(".preview-listing-row") || link;
     row.scrollIntoView({ block: "nearest" });
   }
 
   function upLink() {
-    return document.querySelector(".grip-listing-up a");
+    return document.querySelector(".preview-listing-up a");
   }
 
   function initialFocus(links) {

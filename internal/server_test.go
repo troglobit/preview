@@ -378,12 +378,12 @@ func TestFolderPageRendersTemplate(t *testing.T) {
 				"<title>" + defaultHTMLTitle + "</title>",
 				`<link rel="stylesheet" href="/static/css/dir-listing.css" />`,
 				`<script src="/static/js/dir-listing.js"></script>`,
-				`<table class="grip-listing">`,
+				`<table class="preview-listing">`,
 				`<a href="sub/">sub</a>`,
 				`<a href="a.md">a.md</a>`,
 				`&lt;img src=x onerror=alert(1)&gt;.md`,
 			},
-			notWant: []string{"grip-listing-up", "<img src=x"},
+			notWant: []string{"preview-listing-up", "<img src=x"},
 		},
 		{
 			name: "nested",
@@ -479,7 +479,7 @@ func TestMarkdownPageLinksBackToFolder(t *testing.T) {
 			}
 			body := recorder.Body.String()
 			for _, w := range []string{
-				`<a id="grip-back" ` + tt.wantHref,
+				`<a id="preview-back" ` + tt.wantHref,
 				tt.wantLabel,
 				`<link rel="stylesheet" href="/static/css/back-to-folder.css" />`,
 				`<script src="/static/js/back-to-folder.js"></script>`,
@@ -491,7 +491,7 @@ func TestMarkdownPageLinksBackToFolder(t *testing.T) {
 			if strings.Contains(body, "<x>") {
 				t.Errorf("folder name rendered unescaped")
 			}
-			nav := strings.Index(body, `<nav class="grip-back"`)
+			nav := strings.Index(body, `<nav class="preview-back"`)
 			content := strings.Index(body, "<h1")
 			if nav < 0 || content < 0 || nav > content {
 				t.Errorf("expected the back link above the content")
@@ -517,7 +517,7 @@ func TestFolderPageHasNoBackLink(t *testing.T) {
 		if recorder.Code != http.StatusOK {
 			t.Fatalf("%s: expected status %d, got %d", p, http.StatusOK, recorder.Code)
 		}
-		if body := recorder.Body.String(); strings.Contains(body, "grip-back") || strings.Contains(body, "back-to-folder") {
+		if body := recorder.Body.String(); strings.Contains(body, "preview-back") || strings.Contains(body, "back-to-folder") {
 			t.Errorf("%s: folder page must not render the back link or load its assets", p)
 		}
 	}
@@ -545,7 +545,7 @@ func TestFolderPageRendersReadme(t *testing.T) {
 	}
 	body := recorder.Body.String()
 	table := strings.Index(body, "</table>")
-	article := strings.Index(body, `<article class="grip-listing-readme markdown-body">`)
+	article := strings.Index(body, `<article class="preview-listing-readme markdown-body">`)
 	if table < 0 || article < 0 || article < table {
 		t.Fatalf("expected README article after the table, got %q", body)
 	}
@@ -698,7 +698,7 @@ func TestEventsStreamsReload(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+"/__grip/events?path="+url.QueryEscape("/docs/a.md"), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+"/__preview/events?path="+url.QueryEscape("/docs/a.md"), nil)
 	if err != nil {
 		t.Fatalf("new request: %v", err)
 	}
@@ -790,7 +790,7 @@ func TestEventsRejectsBadPath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
-			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/__grip/events"+tt.query, nil))
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/__preview/events"+tt.query, nil))
 			if recorder.Code != http.StatusBadRequest {
 				t.Fatalf("expected status %d, got %d", http.StatusBadRequest, recorder.Code)
 			}
@@ -806,7 +806,7 @@ func TestEventsDisabledWithoutReload(t *testing.T) {
 	handler := server.newHandler(http.Dir(dir))
 
 	recorder := httptest.NewRecorder()
-	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/__grip/events?path=/a.md", nil))
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/__preview/events?path=/a.md", nil))
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("expected status %d, got %d", http.StatusNotFound, recorder.Code)
 	}

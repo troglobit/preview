@@ -2,7 +2,7 @@
    breadcrumb above a file on github.com. Colors come from the variables that
    github-markdown-{light,dark}.css define on .markdown-body. */
 
-.grip-back {
+.preview-back {
   /* Keep clear of the fixed #theme-toggle (20px inset, 32px wide) when the
      page has no bounding box and the link sits at the top right edge. */
   margin: 0 52px 16px 0;
@@ -10,7 +10,7 @@
   line-height: 20px;
 }
 
-.grip-back a {
+.preview-back a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -21,19 +21,19 @@
   word-break: break-all;
 }
 
-.grip-back a:hover,
-.grip-back a:focus-visible {
+.preview-back a:hover,
+.preview-back a:focus-visible {
   color: inherit;
   text-decoration: underline;
 }
 
-.grip-back .octicon {
+.preview-back .octicon {
   flex: none;
   fill: currentColor;
 }
 
 @media print {
-  .grip-back {
+  .preview-back {
     display: none;
   }
 }

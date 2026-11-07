@@ -28,27 +28,27 @@ func TestRenderListing(t *testing.T) {
 		{
 			name:    "root has no up row",
 			dirPath: "/",
-			want:    []string{`<nav class="grip-listing-path">/</nav>`, `<table class="grip-listing">`},
-			notWant: []string{"grip-listing-up", ">..<"},
+			want:    []string{`<nav class="preview-listing-path">/</nav>`, `<table class="preview-listing">`},
+			notWant: []string{"preview-listing-up", ">..<"},
 		},
 		{
 			name:    "nested up row carries from",
 			dirPath: "/a/b/",
-			want:    []string{`<tr class="grip-listing-row grip-listing-up"><td class="grip-listing-name"><a href="../?from=b">..</a></td>`},
+			want:    []string{`<tr class="preview-listing-row preview-listing-up"><td class="preview-listing-name"><a href="../?from=b">..</a></td>`},
 		},
 		{
 			name:    "folder href has slash",
 			dirPath: "/",
 			want: []string{
-				`<tr class="grip-listing-row" data-dir="true">`,
+				`<tr class="preview-listing-row" data-dir="true">`,
 				`<a href="sub/">sub</a>`,
-				`<td class="grip-listing-mtime"><time datetime="2026-10-09T10:00:00Z" title="2026-10-09 10:00:00 UTC">3 hours ago</time></td>`,
+				`<td class="preview-listing-mtime"><time datetime="2026-10-09T10:00:00Z" title="2026-10-09 10:00:00 UTC">3 hours ago</time></td>`,
 			},
 		},
 		{
 			name:    "space escaped",
 			dirPath: "/",
-			want:    []string{`href="my%20notes.md"`, `>my notes.md</a>`, `<td class="grip-listing-size">1.5 KB</td>`},
+			want:    []string{`href="my%20notes.md"`, `>my notes.md</a>`, `<td class="preview-listing-size">1.5 KB</td>`},
 		},
 		{
 			name:    "hostile name escaped",
@@ -60,7 +60,7 @@ func TestRenderListing(t *testing.T) {
 			name:    "readme article present",
 			dirPath: "/docs/",
 			readme:  template.HTML("<h1>Docs</h1>"),
-			want:    []string{`</table>`, `<article class="grip-listing-readme markdown-body"><h1>Docs</h1></article>`},
+			want:    []string{`</table>`, `<article class="preview-listing-readme markdown-body"><h1>Docs</h1></article>`},
 		},
 		{
 			name:    "readme absent",

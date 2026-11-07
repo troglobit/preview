@@ -1,5 +1,5 @@
 // Markdown page: Esc follows the link back to the containing folder
-// (#grip-back), unless Esc already means something else here.
+// (#preview-back), unless Esc already means something else here.
 (function () {
   function isFormField(el) {
     if (!el || !el.tagName) return false;
@@ -28,7 +28,7 @@
     if (isFormField(event.target) || inMathJax(event.target)) return;
     if (mathJaxOverlayOpen()) return;
 
-    var link = document.getElementById("grip-back");
+    var link = document.getElementById("preview-back");
     if (!link) return;
     event.preventDefault();
     window.location.href = link.href;

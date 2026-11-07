@@ -1,5 +1,5 @@
 (function () {
-  var STORAGE_KEY = "go-grip-width";
+  var STORAGE_KEY = "go-preview-width";
   // Filled from the data-width options in layout.html.
   var MODES = [];
 

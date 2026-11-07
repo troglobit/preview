@@ -8,7 +8,7 @@
   try {
     pagePath = decodeURIComponent(pagePath);
   } catch (e) {}
-  var url = "/__grip/events?path=" + encodeURIComponent(pagePath);
+  var url = "/__preview/events?path=" + encodeURIComponent(pagePath);
 
   var source = null;
 

@@ -1,5 +1,5 @@
 (function () {
-  var STORAGE_KEY = "go-grip-theme";
+  var STORAGE_KEY = "go-preview-theme";
   var MODES = ["light", "dark"];
 
   function browserPrefers() {

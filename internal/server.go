@@ -44,7 +44,7 @@ type Server struct {
 const reloadDebounce = 100 * time.Millisecond
 
 // eventsPath is the live reload stream endpoint.
-const eventsPath = "/__grip/events"
+const eventsPath = "/__preview/events"
 
 // reloading reports whether live reload is on: requested and backed by a
 // running hub.
