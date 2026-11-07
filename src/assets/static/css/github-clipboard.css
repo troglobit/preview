@@ -10,7 +10,7 @@ clipboard-copy {
   height: 28px;
   padding: 0;
   margin: 8px;
-  color: #4493f8;
+  color: var(--fgColor-default);
   background-color: transparent;
   border: 0;
   border-radius: 6px;
@@ -18,31 +18,19 @@ clipboard-copy {
   transition: background-color 0.2s;
 }
 
-[data-theme="dark"] clipboard-copy {
-  color: #f0f6fc;
-}
-
 /* Hover state */
 clipboard-copy:hover {
-  background-color: #eff2f5;
-}
-
-[data-theme="dark"] clipboard-copy:hover {
-  background-color: #212830;
+  background-color: var(--bgColor-neutral-muted);
 }
 
 /* Active state */
 clipboard-copy:active {
-  background-color: #e6eaef;
-}
-
-[data-theme="dark"] clipboard-copy:active {
-  background-color: #212830;
+  background-color: var(--bgColor-muted);
 }
 
 /* Focus state */
 clipboard-copy:focus {
-  outline: 2px solid #0969da;
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: -2px;
 }
 
@@ -67,16 +55,16 @@ clipboard-copy:focus:not(:focus-visible) {
 .js-clipboard-copy-icon,
 .octicon-copy {
   display: block;
-  fill: #9198a1 !important; /* Gray color from GitHub */
-  color: #59636e;
+  fill: var(--fgColor-muted) !important;
+  color: var(--fgColor-muted);
 }
 
 /* Check icon - hidden by default, GREEN */
 .js-clipboard-check-icon,
 .octicon-check {
   display: none;
-  fill: #3fb950 !important; /* Green color from GitHub */
-  color: #3fb950 !important;
+  fill: var(--fgColor-success) !important;
+  color: var(--fgColor-success) !important;
 }
 
 /* Success state - hide copy icon, show check icon */
@@ -103,10 +91,10 @@ clipboard-copy:focus:not(:focus-visible) {
   font-size: 12px;
   font-family: -apple-system, "system-ui", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.5;
-  color: #ffffff; /* White text */
+  color: var(--fgColor-onEmphasis);
   text-align: center;
   white-space: pre;
-  background: #3d444d; /* Dark gray background - GitHub's exact color */
+  background: var(--bgColor-emphasis);
   border-radius: 6px;
   opacity: 0;
   pointer-events: none;

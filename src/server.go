@@ -25,8 +25,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	chroma_html "github.com/alecthomas/chroma/v2/formatters/html"
-	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/troglobit/preview/src/assets"
 )
 
@@ -463,18 +461,16 @@ func (s *Server) serveMarkdown(w http.ResponseWriter, r *http.Request, root *Roo
 
 	var buf bytes.Buffer
 	err = renderTemplate(&buf, htmlStruct{
-		Content:      string(htmlContent),
-		BoundingBox:  s.boundingBox,
-		CssCodeLight: getCssCode("github"),
-		CssCodeDark:  getCssCode("github-dark"),
-		Title:        html.EscapeString(s.pageTitle(r.URL.Path)),
-		Reload:       s.reloading(),
-		Features:     s.parser.TemplateFeatures(),
-		IconPacks:    s.iconPacks,
-		BackHref:     html.EscapeString(backHref(r.URL.Path)),
-		BackLabel:    html.EscapeString(backLabel(r.URL.Path)),
-		PrevHref:     html.EscapeString(prev),
-		NextHref:     html.EscapeString(next),
+		Content:     string(htmlContent),
+		BoundingBox: s.boundingBox,
+		Title:       html.EscapeString(s.pageTitle(r.URL.Path)),
+		Reload:      s.reloading(),
+		Features:    s.parser.TemplateFeatures(),
+		IconPacks:   s.iconPacks,
+		BackHref:    html.EscapeString(backHref(r.URL.Path)),
+		BackLabel:   html.EscapeString(backLabel(r.URL.Path)),
+		PrevHref:    html.EscapeString(prev),
+		NextHref:    html.EscapeString(next),
 	})
 	if err != nil {
 		s.serverError(w, r, err)
@@ -537,15 +533,13 @@ func (s *Server) serveFolder(w http.ResponseWriter, r *http.Request, root *Root)
 
 	var buf bytes.Buffer
 	err = renderTemplate(&buf, htmlStruct{
-		Content:      listing,
-		BoundingBox:  s.boundingBox,
-		CssCodeLight: getCssCode("github"),
-		CssCodeDark:  getCssCode("github-dark"),
-		Title:        html.EscapeString(title),
-		IsListing:    true,
-		Reload:       s.reloading(),
-		Features:     s.parser.TemplateFeatures(),
-		IconPacks:    s.iconPacks,
+		Content:     listing,
+		BoundingBox: s.boundingBox,
+		Title:       html.EscapeString(title),
+		IsListing:   true,
+		Reload:      s.reloading(),
+		Features:    s.parser.TemplateFeatures(),
+		IconPacks:   s.iconPacks,
 	})
 	if err != nil {
 		s.serverError(w, r, err)
@@ -562,13 +556,11 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 }
 
 type htmlStruct struct {
-	Content      string
-	BoundingBox  bool
-	CssCodeLight string
-	CssCodeDark  string
-	Title        string
-	IsListing    bool
-	Reload       bool
+	Content     string
+	BoundingBox bool
+	Title       string
+	IsListing   bool
+	Reload      bool
 	// BackHref and BackLabel describe the link from a Markdown page to its
 	// folder. Both are HTML-escaped; they are empty on folder pages.
 	BackHref  string
@@ -620,14 +612,6 @@ func renderTemplate(w io.Writer, html htmlStruct) error {
 		return err
 	}
 	return tmpl.Execute(w, html)
-}
-
-func getCssCode(style string) string {
-	buf := new(strings.Builder)
-	formatter := chroma_html.New(chroma_html.WithClasses(true))
-	s := styles.Get(style)
-	_ = formatter.WriteCSS(buf, s)
-	return buf.String()
 }
 
 func setNoCacheHeaders(w http.ResponseWriter) {

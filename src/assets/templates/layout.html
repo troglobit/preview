@@ -5,20 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ .Title }}</title>
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico" />
-    <link
-      id="theme-light"
-      rel="stylesheet"
-      href="/static/css/github-markdown-light.css"
-      media="(prefers-color-scheme: light)"
-    />
-    <link
-      id="theme-dark"
-      rel="stylesheet"
-      href="/static/css/github-markdown-dark.css"
-      media="(prefers-color-scheme: dark)"
-    />
-    <style id="highlight-light" media="(prefers-color-scheme: light)">{{ .CssCodeLight }}</style>
-    <style id="highlight-dark" media="(prefers-color-scheme: dark)">{{ .CssCodeDark }}</style>
+    <script>
+      // Theme state lives on <html>: data-theme picks a palette in themes.css
+      // and data-colorblind its colorblind overlay. A stored choice is applied
+      // here, before the first paint; without one the page follows the OS.
+      // theme-switch.js drives the buttons and reads this config.
+      window.previewTheme = {
+        themeKey: "preview-theme",
+        colorblindKey: "preview-colorblind",
+        themes: ["light", "dark", "dimmed"]
+      };
+      (function (config) {
+        try {
+          var theme = localStorage.getItem(config.themeKey);
+          if (config.themes.indexOf(theme) !== -1) {
+            document.documentElement.setAttribute("data-theme", theme);
+          }
+          if (localStorage.getItem(config.colorblindKey) === "1") {
+            document.documentElement.setAttribute("data-colorblind", "");
+          }
+        } catch (e) {}
+      })(window.previewTheme);
+    </script>
+    <link rel="stylesheet" href="/static/css/themes.css" />
+    <link rel="stylesheet" href="/static/css/github-markdown.css" />
+    <link rel="stylesheet" href="/static/css/syntax.css" />
     <link rel="stylesheet" href="/static/css/github-print.css" media="print" />
     {{if index .Features "mermaid"}}
     <link rel="stylesheet" href="/static/css/github-mermaid.css" />
@@ -79,6 +90,9 @@
         <input id="width-custom-input" type="text" inputmode="numeric" maxlength="2" placeholder="--" />%
       </label>
     </div>
+    <button id="colorblind-toggle" class="theme-toggle colorblind-toggle" title="Colorblind palette: off" aria-pressed="false">
+      <span class="theme-toggle-icon"><svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14c-1.981 0-3.671-.992-4.933-2.078C1.797 10.83.88 9.576.43 8.898a1.62 1.62 0 0 1 0-1.798c.45-.677 1.367-1.931 2.637-3.022C4.33 2.992 6.019 2 8 2ZM1.679 7.932a.12.12 0 0 0 0 .136c.411.622 1.241 1.75 2.366 2.717C5.176 11.758 6.527 12.5 8 12.5c1.473 0 2.825-.742 3.955-1.715 1.124-.967 1.954-2.096 2.366-2.717a.12.12 0 0 0 0-.136c-.412-.621-1.242-1.75-2.366-2.717C10.824 4.242 9.473 3.5 8 3.5c-1.473 0-2.825.742-3.955 1.715-1.124.967-1.954 2.096-2.366 2.717ZM8 10a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 10Z"></path></svg></span>
+    </button>
     {{if .Reload}}
     <button id="reload-toggle" class="theme-toggle" title="Pause auto-reload">
       <span class="theme-toggle-icon"></span>

@@ -1,79 +1,69 @@
+// Theme toggle, cycling light, dark and dimmed, and a colorblind toggle that
+// swaps in GitHub's colorblind hues. The head script in layout.html owns the
+// storage keys and the theme list (window.previewTheme) and applies a stored
+// choice before the first paint. Without a stored choice the page follows
+// the OS, so nothing is written here until a button is clicked.
 (function () {
-  var STORAGE_KEY = "go-preview-theme";
-  var MODES = ["light", "dark"];
+  var config = window.previewTheme;
+  var root = document.documentElement;
+  var ICONS = { light: "☀", dark: "☾", dimmed: "◐" };
 
-  function browserPrefers() {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark";
-    }
-    return "light";
+  function currentTheme() {
+    var set = root.getAttribute("data-theme");
+    if (config.themes.indexOf(set) !== -1) return set;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
 
-  function getPreference() {
-    try {
-      var stored = localStorage.getItem(STORAGE_KEY);
-      if (stored && MODES.indexOf(stored) !== -1) return stored;
-    } catch (e) {}
-    return browserPrefers();
-  }
-
-  function applyTheme(mode) {
-    var lightCSS = document.getElementById("theme-light");
-    var darkCSS = document.getElementById("theme-dark");
-    var lightHL = document.getElementById("highlight-light");
-    var darkHL = document.getElementById("highlight-dark");
-
-    if (mode === "dark") {
-      if (lightCSS) lightCSS.media = "not all";
-      if (darkCSS) darkCSS.media = "all";
-      if (lightHL) lightHL.media = "not all";
-      if (darkHL) darkHL.media = "all";
-      document.body.setAttribute("data-theme", "dark");
-    } else {
-      if (lightCSS) lightCSS.media = "all";
-      if (darkCSS) darkCSS.media = "not all";
-      if (lightHL) lightHL.media = "all";
-      if (darkHL) darkHL.media = "not all";
-      document.body.setAttribute("data-theme", "light");
-    }
-
-    updateIcon(mode);
-
-    try {
-      localStorage.setItem(STORAGE_KEY, mode);
-    } catch (e) {}
-
-    document.body.dispatchEvent(
-      new CustomEvent("themechange", { detail: { mode: mode } })
-    );
-  }
-
-  function updateIcon(mode) {
+  function renderButtons() {
+    var theme = currentTheme();
     var btn = document.getElementById("theme-toggle");
-    if (!btn) return;
-    var icon = btn.querySelector(".theme-toggle-icon");
-    if (!icon) return;
+    if (btn) {
+      btn.querySelector(".theme-toggle-icon").textContent = ICONS[theme];
+      btn.title = "Theme: " + theme.charAt(0).toUpperCase() + theme.slice(1);
+    }
 
-    if (mode === "dark") {
-      icon.textContent = "\u263E";
-      btn.title = "Theme: Dark";
-    } else {
-      icon.textContent = "\u2600";
-      btn.title = "Theme: Light";
+    var on = root.hasAttribute("data-colorblind");
+    var cb = document.getElementById("colorblind-toggle");
+    if (cb) {
+      cb.setAttribute("aria-pressed", on ? "true" : "false");
+      cb.title = on ? "Colorblind palette: on" : "Colorblind palette: off";
     }
   }
 
-  function toggle() {
-    var current = getPreference();
-    applyTheme(current === "light" ? "dark" : "light");
+  function store(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {}
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    applyTheme(getPreference());
+    renderButtons();
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderButtons);
 
-    var btn = document.getElementById("theme-toggle");
-    if (btn) {
-      btn.addEventListener("click", toggle);
+    var theme = document.getElementById("theme-toggle");
+    if (theme) {
+      theme.addEventListener("click", function () {
+        var themes = config.themes;
+        var next = themes[(themes.indexOf(currentTheme()) + 1) % themes.length];
+        root.setAttribute("data-theme", next);
+        store(config.themeKey, next);
+        renderButtons();
+        document.body.dispatchEvent(new CustomEvent("themechange", { detail: { mode: next } }));
+      });
+    }
+
+    var colorblind = document.getElementById("colorblind-toggle");
+    if (colorblind) {
+      colorblind.addEventListener("click", function () {
+        var on = !root.hasAttribute("data-colorblind");
+        if (on) {
+          root.setAttribute("data-colorblind", "");
+        } else {
+          root.removeAttribute("data-colorblind");
+        }
+        store(config.colorblindKey, on ? "1" : "0");
+        renderButtons();
+      });
     }
   });
 })();

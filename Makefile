@@ -27,4 +27,15 @@ lint:
 clean:
 	rm -f preview
 
-.PHONY: all build run test vet fmt fmt-check lint clean
+# Regenerate the theme palettes from @primer/primitives (needs network).
+PRIMER_VERSION = 11.10.0
+PRIMER = https://unpkg.com/@primer/primitives@$(PRIMER_VERSION)/dist/css/functional/themes
+themes:
+	@tmp=$$(mktemp -d) && \
+	for t in light dark dark-dimmed light-colorblind dark-colorblind; do \
+		curl -sfL -o "$$tmp/$$t.css" $(PRIMER)/$$t.css || exit 1; \
+	done && \
+	python3 -I src/assets/gen-themes.py "$$tmp" $(PRIMER_VERSION) > src/assets/static/css/themes.css && \
+	rm -r "$$tmp"
+
+.PHONY: all build run test vet fmt fmt-check lint clean themes

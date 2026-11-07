@@ -1,0 +1,89 @@
+/* Code highlighting: chroma's token classes mapped onto GitHub's syntax
+   variables from themes.css, so code follows the theme like the page does.
+   GitHub uses no bold or italic in code, and neither does this. */
+.chroma {
+  color: var(--fgColor-default);
+  background-color: transparent;
+}
+
+/* keywords, storage types, preprocessor directives */
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn, .chroma .kp, .chroma .kr,
+.chroma .kt, .chroma .ow, .chroma .cp {
+  color: var(--color-prettylights-syntax-keyword);
+}
+
+/* strings */
+.chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl, .chroma .sd,
+.chroma .s2, .chroma .sh, .chroma .si, .chroma .sx, .chroma .s1, .chroma .ss,
+.chroma .cpf {
+  color: var(--color-prettylights-syntax-string);
+}
+
+.chroma .sr {
+  color: var(--color-prettylights-syntax-string-regexp);
+}
+
+/* numbers, constants, builtins, escapes */
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh, .chroma .mi, .chroma .il,
+.chroma .mo, .chroma .no, .chroma .nb, .chroma .bp, .chroma .nl, .chroma .py,
+.chroma .se, .chroma .l, .chroma .ld {
+  color: var(--color-prettylights-syntax-constant);
+}
+
+/* functions, classes, decorators, attributes */
+.chroma .nf, .chroma .fm, .chroma .nc, .chroma .nd, .chroma .ne, .chroma .na {
+  color: var(--color-prettylights-syntax-entity);
+}
+
+.chroma .nt {
+  color: var(--color-prettylights-syntax-entity-tag);
+}
+
+.chroma .nv, .chroma .vc, .chroma .vg, .chroma .vi, .chroma .vm, .chroma .ni {
+  color: var(--color-prettylights-syntax-variable);
+}
+
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs, .chroma .gp {
+  color: var(--color-prettylights-syntax-comment);
+}
+
+/* diff and other generic output */
+.chroma .gi {
+  color: var(--color-prettylights-syntax-markup-inserted-text);
+  background-color: var(--color-prettylights-syntax-markup-inserted-bg);
+}
+
+.chroma .gd {
+  color: var(--color-prettylights-syntax-markup-deleted-text);
+  background-color: var(--color-prettylights-syntax-markup-deleted-bg);
+}
+
+.chroma .gh, .chroma .gu {
+  color: var(--color-prettylights-syntax-markup-heading);
+  font-weight: 600;
+}
+
+.chroma .ge {
+  font-style: italic;
+}
+
+.chroma .gs {
+  font-weight: 600;
+}
+
+.chroma .gr, .chroma .gt {
+  color: var(--fgColor-danger);
+}
+
+/* chroma marks text its lexer cannot place as an error; GitHub shows it plain */
+.chroma .err {
+  color: inherit;
+}
+
+.chroma .hl {
+  background-color: var(--bgColor-attention-muted);
+}
+
+.chroma .ln, .chroma .lnt {
+  color: var(--fgColor-muted);
+}

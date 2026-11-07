@@ -1,10 +1,12 @@
+/* The buttons in the top right corner. Colours come from themes.css, so
+   every theme restyles them without rules of their own. */
 .theme-toggle {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 1000;
   background: transparent;
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--borderColor-default);
   border-radius: 6px;
   width: 32px;
   height: 32px;
@@ -24,30 +26,20 @@
 .theme-toggle-icon {
   font-size: 16px;
   line-height: 1;
-  color: #656d76;
+  color: var(--fgColor-muted);
 }
 
-@media (prefers-color-scheme: dark) {
-  .theme-toggle {
-    border-color: #484f58;
-  }
-  .theme-toggle-icon {
-    color: #8b949e;
-  }
+.colorblind-toggle {
+  top: 100px;
 }
 
-[data-theme="dark"] .theme-toggle {
-  border-color: #484f58;
-}
-[data-theme="dark"] .theme-toggle-icon {
-  color: #8b949e;
+:root[data-colorblind] .colorblind-toggle {
+  opacity: 1;
+  border-color: var(--fgColor-accent);
 }
 
-[data-theme="light"] .theme-toggle {
-  border-color: #d0d7de;
-}
-[data-theme="light"] .theme-toggle-icon {
-  color: #656d76;
+:root[data-colorblind] .colorblind-toggle .theme-toggle-icon {
+  color: var(--fgColor-accent);
 }
 
 @media print {

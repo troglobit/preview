@@ -15,7 +15,7 @@
   border-radius: 6px;
   background: inherit;
   color: inherit;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-floating-medium);
 }
 
 .preview-help::backdrop {

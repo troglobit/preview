@@ -977,6 +977,10 @@ func TestPagesHaveKeyboardHelp(t *testing.T) {
 		{"folder page", "/", []string{"Next row"}, []string{"Next Markdown file"}},
 	}
 	always := []string{
+		`<link rel="stylesheet" href="/static/css/themes.css" />`,
+		`<link rel="stylesheet" href="/static/css/syntax.css" />`,
+		`<button id="theme-toggle"`,
+		`<button id="colorblind-toggle"`,
 		`<dialog id="preview-help"`,
 		`<svg class="preview-help-logo"`,
 		`<script src="/static/js/help.js" defer></script>`,
