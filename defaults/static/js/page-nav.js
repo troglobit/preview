@@ -1,7 +1,8 @@
 // Markdown page keys: Esc follows the link back to the containing folder
-// (#preview-back), ArrowLeft and ArrowRight follow the page's rel=prev and
-// rel=next links to the neighbouring Markdown files. A key is left alone
-// when it already means something else here.
+// (#preview-back), ArrowLeft and ArrowRight, or their vi equivalents h and
+// l, follow the page's rel=prev and rel=next links to the neighbouring
+// Markdown files. A key is left alone when it already means something else
+// here.
 (function () {
   function isFormField(el) {
     if (!el || !el.tagName) return false;
@@ -29,8 +30,10 @@
       case "Escape":
         return document.getElementById("preview-back");
       case "ArrowLeft":
+      case "h":
         return document.querySelector('link[rel="prev"]');
       case "ArrowRight":
+      case "l":
         return document.querySelector('link[rel="next"]');
       default:
         return null;

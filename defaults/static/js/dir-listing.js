@@ -51,6 +51,7 @@
     return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
   }
 
+  // Arrow keys and their vi equivalents (h j k l) move.
   function onKeyDown(event) {
     if (event.defaultPrevented || event.isComposing) return;
     if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
@@ -75,8 +76,14 @@
       case "End":
         focusLink(links[links.length - 1]);
         break;
+      case "ArrowRight":
+      case "l":
+        if (current < 0) return;
+        links[current].click();
+        break;
       case "Backspace":
       case "ArrowLeft":
+      case "h":
       case "Escape":
         var up = upLink();
         if (up) window.location.href = up.href;
