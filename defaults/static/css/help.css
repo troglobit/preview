@@ -1,12 +1,14 @@
 /* Keyboard shortcut help, opened with ? (see help.js). The dialog sits
    inside body.markdown-body, so it inherits the page colours and follows
    the theme toggle without rules of its own. */
+/* Centred with a transform, not auto margins: the GitHub stylesheet forces
+   margin-bottom: 0 !important on the body's last child, which this is. */
 .preview-help {
   position: fixed;
-  inset: 0;
-  margin: auto;
-  width: fit-content;
-  height: fit-content;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
   max-width: calc(100% - 32px);
   padding: 0;
   border: 1px solid var(--borderColor-default);
