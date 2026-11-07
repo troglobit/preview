@@ -1,10 +1,17 @@
 # preview
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/images/logo-dark.svg">
+  <img align="right" src=".github/images/logo.svg" alt="A steaming coffee cup" width="128">
+</picture>
+
 Render Markdown files locally, with the look of GitHub.
 
-preview is a small web server that renders Markdown the way GitHub
-does, reloads the page when a file changes, and needs no network
-access.
+preview is a small web server that renders Markdown the way GitHub does,
+reloads the page when a file changes, and needs no network access.  It
+is a fork of [go-grip](https://github.com/chrishrb/go-grip) by Christoph
+Herb, which in turn is a Go reimplementation of the classic Python
+[grip](https://github.com/joeyespo/grip) tool by Joe Esposito.
 
 ## Install
 
@@ -25,9 +32,3 @@ options.
 On a file page, the left and right arrow keys step to the previous and
 next Markdown file in the same folder.  Esc goes up to the folder.
 Press `?` on any page for the full list of keys.
-
-## Origins
-
-preview is a fork of [go-grip](https://github.com/chrishrb/go-grip) by
-Christoph Herb, a Go reimplementation of the Python
-[grip](https://github.com/joeyespo/grip) by Joe Esposito.

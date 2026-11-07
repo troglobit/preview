@@ -975,6 +975,7 @@ func TestPagesHaveKeyboardHelp(t *testing.T) {
 	}
 	always := []string{
 		`<dialog id="preview-help"`,
+		`<svg class="preview-help-logo"`,
 		`<script src="/static/js/help.js" defer></script>`,
 		`<link rel="stylesheet" href="/static/css/help.css" />`,
 	}

@@ -27,10 +27,17 @@
 }
 
 .markdown-body .preview-help h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 12px;
   padding: 0;
   border: 0;
   font-size: 16px;
+}
+
+.preview-help-logo {
+  flex: none;
 }
 
 /* Undo the GitHub table look: no borders, no stripes. */
