@@ -25,10 +25,21 @@ jobs:
       - name: Check
         run: make vet fmt-check test
 
-      - name: Build and upload a draft release
+      - name: Extract ChangeLog entry ...
+        run: |
+          top=$(grep -m1 '^\[v' doc/ChangeLog.md)
+          case "$top" in
+            "[$GITHUB_REF_NAME][] - "*) ;;
+            *) echo "::error::doc/ChangeLog.md starts with '$top', expected '[$GITHUB_REF_NAME][] - YYYY-MM-DD'"
+               exit 1 ;;
+          esac
+          .github/extract-changelog.sh < doc/ChangeLog.md > release.md
+          cat release.md
+
+      - name: Build and upload the release
         uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
-          args: release --clean --config .github/goreleaser.yml
+          args: release --clean --config .github/goreleaser.yml --release-notes release.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
