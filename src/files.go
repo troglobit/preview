@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -70,8 +71,21 @@ func NewRoot(fsys http.FileSystem) *Root {
 	return &Root{fsys: fsys}
 }
 
+// markdownExts are the extensions GitHub renders as Markdown.
+var markdownExts = []string{".md", ".markdown", ".mdown", ".mdwn", ".mkd", ".mkdn", ".mkdown"}
+
 func isMarkdownName(name string) bool {
-	return strings.EqualFold(path.Ext(name), ".md")
+	ext := strings.ToLower(path.Ext(name))
+	return slices.Contains(markdownExts, ext)
+}
+
+// markdownStem returns name without its Markdown extension, and false if
+// name is not a Markdown file.
+func markdownStem(name string) (string, bool) {
+	if !isMarkdownName(name) {
+		return "", false
+	}
+	return strings.TrimSuffix(name, path.Ext(name)), true
 }
 
 // Classify reports what urlPath refers to. Markdown is a regular file with
@@ -156,21 +170,23 @@ func (r *Root) ReadFile(urlPath string) ([]byte, error) {
 	return io.ReadAll(f)
 }
 
-// Readme returns the name of the folder's README.md, matched in any letter
-// case. An exact "README.md" wins over other spellings.
+// Readme returns the name of the folder's README, a Markdown file named
+// README in any letter case. An exact "README.md" wins, then any other
+// spelling of README.md, then the other Markdown extensions.
 func (r *Root) Readme(dirPath string) (name string, ok bool) {
 	entries, err := r.List(dirPath)
 	if err != nil {
 		return "", false
 	}
-	for _, e := range entries {
-		if !e.IsDir && e.Name == "README.md" {
-			return e.Name, true
-		}
-	}
-	for _, e := range entries {
-		if !e.IsDir && strings.EqualFold(e.Name, "README.md") {
-			return e.Name, true
+	for _, match := range []func(string) bool{
+		func(n string) bool { return n == "README.md" },
+		func(n string) bool { return strings.EqualFold(n, "README.md") },
+		func(n string) bool { stem, ok := markdownStem(n); return ok && strings.EqualFold(stem, "README") },
+	} {
+		for _, e := range entries {
+			if !e.IsDir && match(e.Name) {
+				return e.Name, true
+			}
 		}
 	}
 	return "", false

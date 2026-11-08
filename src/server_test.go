@@ -242,6 +242,8 @@ func TestFormatFilenameTitle(t *testing.T) {
 		{name: "uses basename", filename: "/docs/getting-started.md", want: "Getting Started"},
 		{name: "preserves acronym", filename: "README.md", want: "README"},
 		{name: "strips uppercase extension", filename: "release_notes.MD", want: "Release Notes"},
+		{name: "strips other markdown extension", filename: "notes.markdown", want: "Notes"},
+		{name: "keeps unknown extension", filename: "notes.txt", want: "Notes.txt"},
 		{name: "collapses separators and whitespace", filename: "  release---notes__v2.md", want: "Release Notes V2"},
 		{name: "supports unicode", filename: "überblick-plan.md", want: "Überblick Plan"},
 		{name: "falls back for empty stem", filename: ".md", want: ""},
@@ -1295,5 +1297,27 @@ func TestEventsRejectionLogsWarning(t *testing.T) {
 	}
 	if got, want := buf.String(), "WARN live reload request rejected page=/../x.md\n"; got != want {
 		t.Fatalf("got %q, want %q", got, want)
+	}
+}
+
+func TestHandlerOtherMarkdownExtensions(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := writeTree(t, map[string]string{
+		"a.markdown": "# A\n",
+		"b.mdown":    "# B\n",
+		"c.mkd":      "# C\n",
+		"d.txt":      "# D\n",
+	})
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), nil)
+	handler := server.newHandler(http.Dir(tmpDir))
+
+	for path, rendered := range map[string]bool{"/a.markdown": true, "/b.mdown": true, "/c.mkd": true, "/d.txt": false} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, path, nil))
+		got := strings.Contains(recorder.Body.String(), "</h1>")
+		if got != rendered {
+			t.Errorf("%s: rendered = %v, want %v", path, got, rendered)
+		}
 	}
 }

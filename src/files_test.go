@@ -154,8 +154,20 @@ func TestRootReadme(t *testing.T) {
 			wantOK:   true,
 		},
 		{
+			name:     "other extension",
+			files:    fstest.MapFS{"README.markdown": {Data: []byte("r")}},
+			wantName: "README.markdown",
+			wantOK:   true,
+		},
+		{
+			name:     "md preferred over other extension",
+			files:    fstest.MapFS{"README.markdown": {Data: []byte("r")}, "Readme.md": {Data: []byte("r")}},
+			wantName: "Readme.md",
+			wantOK:   true,
+		},
+		{
 			name:  "absent",
-			files: fstest.MapFS{"other.md": {Data: []byte("o")}},
+			files: fstest.MapFS{"other.md": {Data: []byte("o")}, "README.txt": {Data: []byte("t")}},
 		},
 	}
 

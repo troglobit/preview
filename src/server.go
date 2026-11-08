@@ -586,9 +586,8 @@ func (s *Server) pageTitle(filename string) string {
 
 func formatFilenameTitle(filename string) string {
 	filename = path.Base(filename)
-	extension := path.Ext(filename)
-	if strings.EqualFold(extension, ".md") {
-		filename = strings.TrimSuffix(filename, extension)
+	if stem, ok := markdownStem(filename); ok {
+		filename = stem
 	}
 
 	filename = strings.Map(func(r rune) rune {
