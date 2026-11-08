@@ -40,12 +40,12 @@ jobs:
             *) echo "::error::doc/ChangeLog.md starts with '$top', expected '${want}...' for $tag"
                exit 1 ;;
           esac
-          .github/extract-changelog.sh < doc/ChangeLog.md > release.md
-          cat release.md
+          .github/extract-changelog.sh < doc/ChangeLog.md > "$RUNNER_TEMP/release.md"
+          cat "$RUNNER_TEMP/release.md"
 
       # Via the module proxy, not GitHub releases; goreleaser needs a newer Go.
       - name: Build and upload the release
-        run: go run github.com/goreleaser/goreleaser/v2@v2.20.0 release --clean --config .github/goreleaser.yml --release-notes release.md
+        run: go run github.com/goreleaser/goreleaser/v2@v2.20.0 release --clean --config .github/goreleaser.yml --release-notes "$RUNNER_TEMP/release.md"
         env:
           GOTOOLCHAIN: auto
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
