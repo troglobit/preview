@@ -27,10 +27,17 @@ jobs:
 
       - name: Extract ChangeLog entry ...
         run: |
+          # A release needs its dated entry on top.  A pre-release, such as
+          # v1.0.0-rc1, goes out with the upcoming v1.0.0 entry, dated or not.
+          tag=$GITHUB_REF_NAME
           top=$(grep -m1 '^\[v' doc/ChangeLog.md)
+          case "$tag" in
+            *-*) want="[${tag%%-*}][" ;;
+            *)   want="[$tag][] - " ;;
+          esac
           case "$top" in
-            "[$GITHUB_REF_NAME][] - "*) ;;
-            *) echo "::error::doc/ChangeLog.md starts with '$top', expected '[$GITHUB_REF_NAME][] - YYYY-MM-DD'"
+            "$want"*) ;;
+            *) echo "::error::doc/ChangeLog.md starts with '$top', expected '${want}...' for $tag"
                exit 1 ;;
           esac
           .github/extract-changelog.sh < doc/ChangeLog.md > release.md
