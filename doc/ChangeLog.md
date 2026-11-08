@@ -3,8 +3,8 @@ Change Log
 
 All notable changes to the project are documented in this file.
 
-[v1.0.0][UNRELEASED]
---------------------
+[v1.0.0][] - 2026-11-08
+-----------------------
 
 First release of preview, a fork of [go-grip][] v0.11.0 by Christoph
 Herb.  The changes below are relative to that release.
