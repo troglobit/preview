@@ -37,8 +37,9 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/preview $(DESTDIR)$(MANDIR)/man1/preview.1
 
 # Build the release packages locally into dist/, as the release workflow does.
+GORELEASER = GOTOOLCHAIN=auto go run github.com/goreleaser/goreleaser/v2@v2.20.0
 snapshot:
-	goreleaser release --snapshot --clean --config .github/goreleaser.yml
+	$(GORELEASER) release --snapshot --clean --config .github/goreleaser.yml
 
 clean:
 	rm -f preview

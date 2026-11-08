@@ -43,10 +43,9 @@ jobs:
           .github/extract-changelog.sh < doc/ChangeLog.md > release.md
           cat release.md
 
+      # Via the module proxy, not GitHub releases; goreleaser needs a newer Go.
       - name: Build and upload the release
-        uses: goreleaser/goreleaser-action@v7
-        with:
-          version: "~> v2"
-          args: release --clean --config .github/goreleaser.yml --release-notes release.md
+        run: go run github.com/goreleaser/goreleaser/v2@v2.20.0 release --clean --config .github/goreleaser.yml --release-notes release.md
         env:
+          GOTOOLCHAIN: auto
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
