@@ -61,7 +61,7 @@ func (r *HTMLRenderer) renderFencedCodeBlock(w util.BufWriter, source []byte, no
 		return ast.WalkContinue, nil
 	}
 
-	_, _ = w.WriteString(`<div class="highlight notranslate position-relative overflow-auto"">`)
+	_, _ = w.WriteString(`<div class="highlight notranslate position-relative overflow-auto">`)
 
 	language := n.Language(source)
 	var lexer chroma.Lexer

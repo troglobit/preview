@@ -31,7 +31,7 @@ Title
 	if !strings.Contains(output, "<h1>Title</h1>") {
 		t.Error("failed to render title")
 	}
-	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto"">`) {
+	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto">`) {
 		t.Error("failed to render highlight div")
 	}
 	if !strings.Contains(output, "clipboard-copy") {
@@ -66,7 +66,7 @@ func main() {
 	if !strings.Contains(output, "<h1>Title</h1>") {
 		t.Error("failed to render title")
 	}
-	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto"">`) {
+	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto">`) {
 		t.Error("failed to render highlight div")
 	}
 	if !strings.Contains(output, "func main()") {
@@ -99,7 +99,7 @@ int main() {
 	if !strings.Contains(output, "<h1>Title</h1>") {
 		t.Error("failed to render title")
 	}
-	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto"">`) {
+	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto">`) {
 		t.Error("failed to render highlight div")
 	}
 	if !strings.Contains(output, "#include") {
@@ -130,7 +130,7 @@ User-Agent: foo
 	}
 
 	output := buffer.String()
-	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto"">`) {
+	if !strings.Contains(output, `<div class="highlight notranslate position-relative overflow-auto">`) {
 		t.Error("failed to render highlight div")
 	}
 	if !strings.Contains(output, "GET") {

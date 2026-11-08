@@ -48,6 +48,8 @@ Herb.  The changes below are relative to that release.
 
 - Raw HTML blocks that end on a closing tag, such as a `<pre>` block,
   were dropped from the page
+- The wrapper of every highlighted code block had a stray quote in its
+  `class` attribute
 
 [go-grip]: https://github.com/chrishrb/go-grip
 
