@@ -1,22 +1,19 @@
-# preview
-
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/images/logo-dark.svg">
   <img align="right" src=".github/images/logo.svg" alt="A steaming coffee cup" width="128">
 </picture>
 
-Render Markdown files locally, with the look of GitHub.
+Preview Markdown files locally, with the look of GitHub.
 
 preview is a small web server that renders Markdown the way GitHub does,
 reloads the page when a file changes, and needs no network access.  It
-is a fork of [go-grip](https://github.com/chrishrb/go-grip) by Christoph
-Herb, which in turn is a Go reimplementation of the classic Python
-[grip](https://github.com/joeyespo/grip) tool by Joe Esposito.
+is a fork of [go-grip][0] by Christoph Herb, which in turn is a Go
+reimplementation of the classic Python [grip][1] tool by Joe Esposito.
 
 ## Install
 
 Each [release][] has `.deb` and `.rpm` packages and archives for Linux,
-macOS and Windows, all with the `preview(1)` man page.  With Go
+macOS and Windows, all with the [`preview(1)`][2] man page.  With Go
 installed:
 
     go install github.com/troglobit/preview@latest
@@ -42,3 +39,7 @@ for the other options.
 On a file page, the left and right arrow keys step to the previous and
 next Markdown file in the same folder.  Esc goes up to the folder.
 Press `?` on any page for the full list of keys.
+
+[0]: https://github.com/chrishrb/go-grip
+[1]: https://github.com/joeyespo/grip
+[2]: https://man.troglobit.com/man1/preview.1.html
