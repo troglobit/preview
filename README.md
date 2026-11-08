@@ -15,13 +15,17 @@ Herb, which in turn is a Go reimplementation of the classic Python
 
 ## Install
 
-With Go installed:
+Each [release][] has `.deb` and `.rpm` packages and archives for Linux,
+macOS and Windows, all with the `preview(1)` man page.  With Go
+installed:
 
     go install github.com/troglobit/preview@latest
 
 or, from a checkout, to get the `preview(1)` man page as well:
 
     make install
+
+[release]: https://github.com/troglobit/preview/releases
 
 ## Usage
 

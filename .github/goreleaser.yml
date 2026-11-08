@@ -1,0 +1,70 @@
+version: 2
+
+project_name: preview
+
+before:
+  hooks:
+    - sh -c 'mkdir -p build && gzip -9nc doc/preview.1 > build/preview.1.gz'
+
+builds:
+  - binary: preview
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w
+      - -X github.com/troglobit/preview/src.version={{ .Tag }}
+      - -X github.com/troglobit/preview/src.commit={{ .FullCommit }}
+      - -X github.com/troglobit/preview/src.date={{ .CommitDate }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - doc/preview.1
+
+nfpms:
+  - file_name_template: "{{ .ConventionalFileName }}"
+    vendor: troglobit
+    homepage: https://github.com/troglobit/preview
+    maintainer: Joachim Wiberg <troglobit@gmail.com>
+    description: |-
+      Preview Markdown files in the browser, rendered like GitHub
+      A small web server that renders Markdown files with GitHub's
+      stylesheets and colour themes, reloads pages when files change,
+      and works without network access.
+    license: MIT
+    section: text
+    formats: [deb, rpm]
+    bindir: /usr/bin
+    contents:
+      - src: build/preview.1.gz
+        dst: /usr/share/man/man1/preview.1.gz
+        file_info:
+          mode: 0644
+      - src: LICENSE
+        dst: /usr/share/doc/preview/copyright
+        file_info:
+          mode: 0644
+      - src: README.md
+        dst: /usr/share/doc/preview/README.md
+        file_info:
+          mode: 0644
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  disable: true
+
+release:
+  draft: true
+  name_template: "preview {{ .Tag }}"

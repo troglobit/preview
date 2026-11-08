@@ -36,6 +36,10 @@ install: build
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/preview $(DESTDIR)$(MANDIR)/man1/preview.1
 
+# Build the release packages locally into dist/, as the release workflow does.
+snapshot:
+	goreleaser release --snapshot --clean --config .github/goreleaser.yml
+
 clean:
 	rm -f preview
 
@@ -50,4 +54,4 @@ themes:
 	python3 -I src/assets/gen-themes.py "$$tmp" $(PRIMER_VERSION) > src/assets/static/css/themes.css && \
 	rm -r "$$tmp"
 
-.PHONY: all build run test vet fmt fmt-check lint man-lint install uninstall clean themes
+.PHONY: all build run test vet fmt fmt-check lint man-lint install uninstall snapshot clean themes
