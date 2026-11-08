@@ -1321,3 +1321,25 @@ func TestHandlerOtherMarkdownExtensions(t *testing.T) {
 		}
 	}
 }
+
+func TestStaticAssetsRevalidate(t *testing.T) {
+	t.Parallel()
+
+	server := NewServer("localhost", 6419, false, false, false, NewParser(nil), nil)
+	handler := server.newHandler(http.Dir(t.TempDir()))
+
+	first := httptest.NewRecorder()
+	handler.ServeHTTP(first, httptest.NewRequest(http.MethodGet, "/static/css/themes.css", nil))
+	etag := first.Header().Get("ETag")
+	if first.Code != http.StatusOK || etag == "" {
+		t.Fatalf("first request: status %d, ETag %q", first.Code, etag)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/static/css/themes.css", nil)
+	req.Header.Set("If-None-Match", etag)
+	second := httptest.NewRecorder()
+	handler.ServeHTTP(second, req)
+	if second.Code != http.StatusNotModified {
+		t.Fatalf("repeat request: expected %d, got %d", http.StatusNotModified, second.Code)
+	}
+}

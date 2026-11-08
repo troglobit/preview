@@ -3,6 +3,8 @@ package preview
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"html"
@@ -20,6 +22,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 	"unicode"
@@ -253,7 +256,7 @@ func (s *Server) newHandler(fsys http.FileSystem) http.Handler {
 	root := NewRoot(fsys)
 	fileServer := http.FileServer(fsys)
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.FileServer(http.FS(assets.StaticFiles)))
+	mux.Handle("/static/", staticHandler())
 
 	if s.reloading() {
 		absRoot := ""
@@ -289,6 +292,37 @@ func (s *Server) newHandler(fsys http.FileSystem) http.Handler {
 		w.Header().Set("Cache-Control", "no-cache")
 		mux.ServeHTTP(w, r)
 	}))
+}
+
+// staticETags caches an ETag of each embedded static file's content,
+// computed on first request. Embedded files have no modification time, so
+// without one the browser refetches every asset on every page view.
+var staticETags sync.Map
+
+func staticETag(name string) (string, bool) {
+	if etag, ok := staticETags.Load(name); ok {
+		return etag.(string), true
+	}
+	data, err := fs.ReadFile(assets.StaticFiles, strings.TrimPrefix(name, "/"))
+	if err != nil {
+		return "", false
+	}
+	sum := sha256.Sum256(data)
+	etag := `"` + hex.EncodeToString(sum[:8]) + `"`
+	staticETags.Store(name, etag)
+	return etag, true
+}
+
+// staticHandler serves the embedded assets with an ETag, so a repeat
+// request is answered with 304 Not Modified.
+func staticHandler() http.Handler {
+	files := http.FileServerFS(assets.StaticFiles)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if etag, ok := staticETag(r.URL.Path); ok {
+			w.Header().Set("ETag", etag)
+		}
+		files.ServeHTTP(w, r)
+	})
 }
 
 // serveEvents streams Server-Sent Events to one page: a "reload" event each
