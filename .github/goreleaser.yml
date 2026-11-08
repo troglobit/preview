@@ -67,9 +67,6 @@ nfpms:
 checksum:
   name_template: checksums.txt
 
-changelog:
-  disable: true
-
 release:
   prerelease: auto
   name_template: "preview {{ .Tag }}"
