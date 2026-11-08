@@ -26,6 +26,11 @@ jobs:
       - name: Format
         run: make fmt-check
 
+      - name: Man page
+        run: |
+          sudo apt-get install -y --no-install-recommends mandoc
+          make man-lint
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:

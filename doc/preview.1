@@ -1,0 +1,185 @@
+.Dd November 8, 2026
+.Dt PREVIEW 1
+.Os
+.Sh NAME
+.Nm preview
+.Nd preview Markdown files in the browser, rendered like GitHub
+.Sh SYNOPSIS
+.Nm
+.Op Fl b
+.Op Fl d Ar feature Ns Op , Ns Ar ...
+.Op Fl H Ar host
+.Op Fl p Ar port
+.Op Fl -log-level Ar level
+.Op Fl -mermaid-icon-pack Ar pack Ns Op , Ns Ar ...
+.Op Fl -no-border
+.Op Fl -no-reload
+.Op Ar file | folder
+.Nm
+.Fl h | v
+.Sh DESCRIPTION
+.Nm
+is a small web server that renders Markdown files the way GitHub does.
+It uses GitHub's stylesheets and colour themes, and supports tables,
+task lists, alerts, footnotes, emoji, front matter, math and Mermaid
+diagrams.
+Everything it needs is built in, so it works without network access.
+.Pp
+Given a
+.Ar file ,
+.Nm
+serves the folder that holds it and opens the file.
+Given a
+.Ar folder ,
+it serves that folder and opens its folder page.
+Without an argument it serves the current directory.
+A path that does not exist is an error.
+.Pp
+A folder page lists the folder's entries, folders first, with size and
+modification time, and renders the folder's README below the list, as
+GitHub does.
+Files ending in
+.Pa .md ,
+.Pa .markdown ,
+.Pa .mdown ,
+.Pa .mdwn ,
+.Pa .mkd ,
+.Pa .mkdn
+or
+.Pa .mkdown
+are rendered.
+Other files are served as they are, so images and links between
+documents work.
+.Pp
+While a page is open,
+.Nm
+watches what it shows: the Markdown file and the local images it
+references, or for a folder page, the folder's entries.
+When one of them changes the page reloads.
+Editor temporary and swap files are ignored.
+.Pp
+The buttons in the top right corner cycle the colour theme between
+light, dark and dark dimmed, set the content width, switch to GitHub's
+colorblind palette, and pause reloading for the open page.
+Without a stored choice the theme follows the operating system.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl b , -browser
+Open the start page in the default browser.
+.It Fl d , -disable Ar feature Ns Op , Ns Ar ...
+Turn off Markdown features.
+A
+.Ar feature
+is one of
+.Cm details ,
+.Cm footnote ,
+.Cm ghissue ,
+.Cm mathjax
+or
+.Cm mermaid .
+The option can be repeated.
+.It Fl H , -host Ar host
+Listen on
+.Ar host ,
+a host name or IP address.
+The default is
+.Cm localhost ,
+which other machines cannot reach.
+Use
+.Cm 0.0.0.0
+to listen on all interfaces.
+.It Fl h , -help
+Print a usage summary and exit.
+.It Fl -log-level Ar level
+How much to log on standard error:
+.Cm error ,
+.Cm warn ,
+.Cm info
+or
+.Cm debug .
+The default,
+.Cm info ,
+logs the startup lines, warnings and errors.
+.Cm debug
+adds a line per request, file system event, reload and live reload
+connection.
+.It Fl -mermaid-icon-pack Ar pack Ns Op , Ns Ar ...
+Let Mermaid diagrams use icons from the named iconify icon packs, such
+as
+.Cm logos
+for
+.Ql logos:docker-icon .
+The browser fetches a pack from
+.Lk https://unpkg.com
+the first time a diagram uses one of its icons, so this option needs
+network access.
+.It Fl -no-border
+Render the page without the border around its content.
+.It Fl -no-reload
+Do not reload pages when files change.
+.It Fl p , -port Ar port
+Listen on
+.Ar port .
+Without this option
+.Nm
+uses port 6419, or the first free port of the twenty that follow when
+6419 is busy.
+A port given with
+.Fl p
+is used or fails.
+.It Fl v , -version
+Print the version and exit.
+.El
+.Sh KEYS
+The keys below are shown in the browser by pressing
+.Ic \&? .
+.Ss Folder page
+.Bl -tag -width "Backspace, Esc" -compact
+.It Ic Down , j
+Next row.
+.It Ic Up , k
+Previous row.
+.It Ic Home , End
+First and last row.
+.It Ic Enter , Right , l
+Open the file or folder.
+.It Ic Backspace , Esc , Left , h
+Up to the parent folder.
+.El
+.Ss File page
+.Bl -tag -width "Backspace, Esc" -compact
+.It Ic Left , h
+Previous Markdown file in the folder.
+.It Ic Right , l
+Next Markdown file in the folder.
+.It Ic Esc
+Up to the folder.
+.El
+.Ss Any page
+.Bl -tag -width "Backspace, Esc" -compact
+.It Ic \&?
+Show or hide the list of keys.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Nm
+runs until interrupted, for example with Control-C.
+.Sh EXAMPLES
+Render a README and open it in the browser:
+.Pp
+.Dl $ preview -b README.md
+.Pp
+Browse a documentation folder from another machine, on port 8080:
+.Pp
+.Dl $ preview -H 0.0.0.0 -p 8080 docs/
+.Pp
+Render without math and Mermaid support:
+.Pp
+.Dl $ preview -d mathjax,mermaid notes.md
+.Sh SEE ALSO
+.Lk https://github.com/troglobit/preview
+.Sh HISTORY
+.Nm
+is a fork of go-grip by Christoph Herb, itself a Go reimplementation of
+the Python grip by Joe Esposito.

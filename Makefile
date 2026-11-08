@@ -1,5 +1,7 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS  = -s -w -X github.com/troglobit/preview/src.version=$(VERSION)
+PREFIX  ?= /usr/local
+MANDIR  ?= $(PREFIX)/share/man
 
 all: build
 
@@ -21,8 +23,18 @@ fmt:
 fmt-check:
 	@test -z "$$(gofmt -l .)" || { gofmt -l .; echo "please run make fmt"; exit 1; }
 
-lint:
+lint: man-lint
 	golangci-lint run
+
+man-lint:
+	mandoc -T lint -W warning doc/preview.1
+
+install: build
+	install -D -m 0755 preview $(DESTDIR)$(PREFIX)/bin/preview
+	install -D -m 0644 doc/preview.1 $(DESTDIR)$(MANDIR)/man1/preview.1
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/preview $(DESTDIR)$(MANDIR)/man1/preview.1
 
 clean:
 	rm -f preview
@@ -38,4 +50,4 @@ themes:
 	python3 -I src/assets/gen-themes.py "$$tmp" $(PRIMER_VERSION) > src/assets/static/css/themes.css && \
 	rm -r "$$tmp"
 
-.PHONY: all build run test vet fmt fmt-check lint clean themes
+.PHONY: all build run test vet fmt fmt-check lint man-lint install uninstall clean themes
