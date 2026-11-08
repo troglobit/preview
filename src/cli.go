@@ -12,8 +12,8 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "preview [file]",
-	Short:   "Render markdown document as html",
+	Use:     "preview [file | folder]",
+	Short:   "Preview Markdown files in the browser, rendered like GitHub",
 	Version: buildVersion(),
 	Args:    cobra.MatchAll(cobra.OnlyValidArgs),
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -27,8 +27,8 @@ var rootCmd = &cobra.Command{
 		browser, _ := cmd.Flags().GetBool("browser")
 		host, _ := cmd.Flags().GetString("host")
 		port, _ := cmd.Flags().GetInt("port")
-		boundingBox, _ := cmd.Flags().GetBool("bounding-box")
-		disabledFeatures, _ := cmd.Flags().GetStringSlice("disable-markdown-feature")
+		noBorder, _ := cmd.Flags().GetBool("no-border")
+		disabledFeatures, _ := cmd.Flags().GetStringSlice("disable")
 		iconPacks, _ := cmd.Flags().GetStringSlice("mermaid-icon-pack")
 		noReload, _ := cmd.Flags().GetBool("no-reload")
 		logger, err := newLogger(cmd, os.Stderr)
@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		parser := NewParser(disabledFeatures)
-		server := NewServer(host, port, boundingBox, browser, !noReload, parser, logger)
+		server := NewServer(host, port, !noBorder, browser, !noReload, parser, logger)
 		server.UsePortFallback(!cmd.Flags().Changed("port"))
 		if err := server.SetMermaidIconPacks(iconPacks); err != nil {
 			return fmt.Errorf("--mermaid-icon-pack: %w", err)
@@ -84,16 +84,16 @@ func init() {
 	rootCmd.Flags().BoolP("browser", "b", false, "Open a browser tab")
 	rootCmd.Flags().StringP("host", "H", "localhost", "Host or IP to listen on")
 	rootCmd.Flags().IntP("port", "p", 6419, "Port to use, the next free one is tried when the default is busy")
-	rootCmd.Flags().Bool("bounding-box", true, "Add bounding box to HTML")
-	rootCmd.Flags().StringSlice(
-		"disable-markdown-feature",
+	rootCmd.Flags().Bool("no-border", false, "Render without the border around the page content")
+	rootCmd.Flags().StringSliceP(
+		"disable", "d",
 		nil,
-		"Disable optional markdown feature(s): "+strings.Join(SupportedMarkdownFeatures(), ", "),
+		"Disable Markdown feature(s): "+strings.Join(SupportedMarkdownFeatures(), ", "),
 	)
 	rootCmd.Flags().StringSlice(
 		"mermaid-icon-pack",
 		nil,
-		"Load iconify icon pack(s) for Mermaid diagrams from unpkg.com, e.g. logos",
+		"Fetch iconify icon pack(s) for Mermaid diagrams from unpkg.com, e.g. logos (needs network)",
 	)
 	rootCmd.Flags().Bool("no-reload", false, "Disable automatic browser reload on file changes")
 	rootCmd.Flags().String("log-level", "info", "Log level on stderr: error, warn, info or debug")

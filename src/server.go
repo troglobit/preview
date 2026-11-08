@@ -32,7 +32,7 @@ const defaultHTMLTitle = "preview"
 
 type Server struct {
 	parser       *Parser
-	boundingBox  bool
+	border       bool
 	host         string
 	port         int
 	browser      bool
@@ -57,11 +57,11 @@ func (s *Server) reloading() bool {
 }
 
 // NewServer returns a server. A nil logger discards all output.
-func NewServer(host string, port int, boundingBox bool, browser bool, enableReload bool, parser *Parser, logger *slog.Logger) *Server {
+func NewServer(host string, port int, border bool, browser bool, enableReload bool, parser *Parser, logger *slog.Logger) *Server {
 	return &Server{
 		host:         host,
 		port:         port,
-		boundingBox:  boundingBox,
+		border:       border,
 		browser:      browser,
 		enableReload: enableReload,
 		parser:       parser,
@@ -461,16 +461,16 @@ func (s *Server) serveMarkdown(w http.ResponseWriter, r *http.Request, root *Roo
 
 	var buf bytes.Buffer
 	err = renderTemplate(&buf, htmlStruct{
-		Content:     string(htmlContent),
-		BoundingBox: s.boundingBox,
-		Title:       html.EscapeString(s.pageTitle(r.URL.Path)),
-		Reload:      s.reloading(),
-		Features:    s.parser.TemplateFeatures(),
-		IconPacks:   s.iconPacks,
-		BackHref:    html.EscapeString(backHref(r.URL.Path)),
-		BackLabel:   html.EscapeString(backLabel(r.URL.Path)),
-		PrevHref:    html.EscapeString(prev),
-		NextHref:    html.EscapeString(next),
+		Content:   string(htmlContent),
+		Border:    s.border,
+		Title:     html.EscapeString(s.pageTitle(r.URL.Path)),
+		Reload:    s.reloading(),
+		Features:  s.parser.TemplateFeatures(),
+		IconPacks: s.iconPacks,
+		BackHref:  html.EscapeString(backHref(r.URL.Path)),
+		BackLabel: html.EscapeString(backLabel(r.URL.Path)),
+		PrevHref:  html.EscapeString(prev),
+		NextHref:  html.EscapeString(next),
 	})
 	if err != nil {
 		s.serverError(w, r, err)
@@ -533,13 +533,13 @@ func (s *Server) serveFolder(w http.ResponseWriter, r *http.Request, root *Root)
 
 	var buf bytes.Buffer
 	err = renderTemplate(&buf, htmlStruct{
-		Content:     listing,
-		BoundingBox: s.boundingBox,
-		Title:       html.EscapeString(title),
-		IsListing:   true,
-		Reload:      s.reloading(),
-		Features:    s.parser.TemplateFeatures(),
-		IconPacks:   s.iconPacks,
+		Content:   listing,
+		Border:    s.border,
+		Title:     html.EscapeString(title),
+		IsListing: true,
+		Reload:    s.reloading(),
+		Features:  s.parser.TemplateFeatures(),
+		IconPacks: s.iconPacks,
 	})
 	if err != nil {
 		s.serverError(w, r, err)
@@ -556,11 +556,11 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 }
 
 type htmlStruct struct {
-	Content     string
-	BoundingBox bool
-	Title       string
-	IsListing   bool
-	Reload      bool
+	Content   string
+	Border    bool
+	Title     string
+	IsListing bool
+	Reload    bool
 	// BackHref and BackLabel describe the link from a Markdown page to its
 	// folder. Both are HTML-escaped; they are empty on folder pages.
 	BackHref  string
